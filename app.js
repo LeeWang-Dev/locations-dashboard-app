@@ -24,11 +24,11 @@ const express = require('express');
 const app = express();
 
 
-app.use(express.static(path.join(__dirname, 'react-client/build')));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, './react-client/build')));
+app.use(express.static(path.join(__dirname, './public')));
 
 app.get('/*', (req, res) => {
-   res.sendFile(path.join(__dirname, 'react-client/build', 'index.html'));
+   res.sendFile(path.join(__dirname, './react-client/build', 'index.html'));
 });
 
 app.listen(PORT, () => {
