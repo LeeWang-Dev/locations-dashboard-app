@@ -5,10 +5,10 @@ const fs = require('fs');
 const express = require('express');
 const app = express();
 
-app.use(express.static(__dirname + '/build'));
+app.use(express.static(__dirname + '/react-client/build'));
 
 app.get('/*', (req, res) => {
-   res.sendFile(path.join(__dirname, 'build', 'index.html'));
+   res.sendFile(path.join(__dirname, 'react-client/build', 'index.html'));
 });
 
 app.listen(PORT, () => {
