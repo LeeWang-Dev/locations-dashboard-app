@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { makeStyles } from '@mui/styles';
 
-import ReactMapGL from 'react-map-gl';
+import ReactMapGL, { Marker } from 'react-map-gl';
 
 import { MAPBOX_ACCESS_TOKEN } from "../../utils/constants.js";
+import { getMarkers } from "../../services/locations.js";
 
 const useStyles = makeStyles({
    mapContainer:{
@@ -21,6 +22,16 @@ function Map() {
         latitude: 37.78,
         zoom: 14
     });
+
+    const [markers, setMarkers] = useState([]);
+
+    useEffect(async ()=>{
+
+        var result = await getMarkers();
+        console.log(result);
+        //setMarkers(result);
+ 
+    }, []);
 
     return (
         <ReactMapGL className={classes.mapContainer}
@@ -48,6 +59,9 @@ function Map() {
             //onTouchMove={handleMouseMove}
             //onTouchEnd={handleMouseUp}
         >
+            <Marker latitude={37.78} longitude={-122.41} offsetLeft={-20} offsetTop={-10}>
+                <div>You are here</div>
+            </Marker>
         </ReactMapGL>
     );
 }
