@@ -1,16 +1,18 @@
 import axios from "axios";
 import { BASE_URL } from "../utils/constants.js";
 
-export const getMarkers = async () => {
+export const getClusters = async (params) => {
     var result = null;
     
-    let url = `${BASE_URL}/api/markers/get`;
+    let url = `${BASE_URL}/api/clusters`;
   
-    await axios.get(url).then((response) => {
+    await axios.get(url,{
+      params: params || {}
+    }).then((response) => {
         result = response.data;
       }).catch((err) => {
         result = {
-          status: "disconnected",
+          status: "failed",
           message: "No internet connection",
         };
       });
