@@ -2,12 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import { makeStyles } from '@mui/styles';
 
-import ReactMapGL, { Source, Layer } from 'react-map-gl';
+import ReactMapGL, { Source, Layer, ScaleControl } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import mapboxgl from "mapbox-gl";
 
+import numeral from "numeral";
+
 import { MAPBOX_ACCESS_TOKEN } from "../../utils/constants.js";
 import { getClusters } from "../../services/cluster.js";
+
+import iconMarker from "../../assets/images/marker-icon.png";
 
 mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
 
@@ -33,7 +37,7 @@ function Map() {
         features:[]
     });
     //const [mapCursor, setMapCursor] = useState('default');
-
+    
     const handleViewport = (viewport) => {
         setViewport(viewport);
     }
@@ -63,16 +67,43 @@ function Map() {
     }
 
     useEffect(()=>{
+
         const map = mapRef.current.getMap();
-        map.on('idle', async () => {
-            let res = await getClusters({
-                zoom: map.getZoom(),
-                bounds: map.getBounds().toArray().flat()
-            });
-            if(res.status === 'success'){
-               setClusterSource(res.result);
-            }
+
+        let timeout = null;
+
+        map.loadImage(iconMarker, (error, image) => {
+            if (error) throw error;
+            // Add the image to the map style.
+            map.addImage('marker-icon', image);
         });
+
+        map.on('moveend', mapDataCallback);
+
+        function mapDataCallback(){
+            if(timeout){
+                clearTimeout(timeout);
+            }
+            timeout = setTimeout(async () => {
+               let res = await getClusters({
+                   zoom: map.getZoom(),
+                   bounds: map.getBounds().toArray().flat()
+               });
+               if(res.status === 'success'){
+                   if(res.result && res.result.features){
+                        res.result.features.forEach(feature => {
+                            var abbr = numeral(feature.properties["point_count"]).format("0.[0] a").toUpperCase();
+                            if(feature.properties["point_count"]>=1000){
+                               abbr += '+';
+                            }
+                            feature.properties["point_count_abbreviated"] = abbr;
+                        });
+                        setClusterSource(res.result);
+                   }
+               }
+            }, 500);
+        }
+
     }, []);
 
     return (
@@ -80,13 +111,13 @@ function Map() {
             {...viewport}    
             width="100%"
             height="100%"
-            mapStyle="mapbox://styles/mapbox/satellite-v9"
+            mapStyle="mapbox://styles/mapbox/light-v10"
             mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
             ref={mapRef}
             attributionControl={false}
             maxZoom={24}
             //minZoom={16}
-            maxPitch={0}
+            //maxPitch={0}
             //dragPan={dragPan}
             //preserveDrawingBuffer={true}
             //dragRotate={false}
@@ -102,15 +133,14 @@ function Map() {
             //onTouchMove={handleMouseMove}
             //onTouchEnd={handleMouseUp}
         >
-            {
-                <Source
-                    id="clusterSource"
-                    type="geojson"
-                    data={clusterSource}
-                    //cluster={true}
-                    //clusterMaxZoom={14}
-                    //clusterRadius={50}
-                >
+            <Source
+                id="clusterSource"
+                type="geojson"
+                data={clusterSource}
+                //cluster={true}
+                //clusterMaxZoom={14}
+                //clusterRadius={50}
+            >
                 <Layer
                     id='cluster-layer'
                     type='circle'
@@ -127,26 +157,25 @@ function Map() {
                     source='clusterSource'
                     filter={['>', 'point_count', 1]}
                     layout={{
-                        'text-field': '{point_count}',
+                        'text-field': '{point_count_abbreviated}',
                         'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
                         'text-size': 12
                     }}
                 />
                 <Layer
                     id='unclustered-point-layer'
-                    type='circle'
+                    type='symbol'
                     source='clusterSource'
                     filter={['==', 'point_count', 1]}
-                    paint={{
-                        'circle-color': '#11b4da',
-                        'circle-radius': 4,
-                        'circle-stroke-width': 1,
-                        'circle-stroke-color': '#fff'
+                    layout={{
+                        'icon-image': 'marker-icon',
+                        'icon-size': 0.6,
+                        'icon-rotate': ["get","heading"]
                     }}
                 />
-                </Source>
-            }
-            
+            </Source>
+            <ScaleControl 
+                style={{bottom:10,left:10}} />
         </ReactMapGL>
     );
 }

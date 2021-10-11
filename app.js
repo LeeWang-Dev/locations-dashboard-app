@@ -18,6 +18,16 @@ const dbClient = new Client({
   }
 });
 
+/*
+const dbClient = new Client({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'locations_db',
+  password: 'testing',
+  port: 5432
+});
+*/
+
 dbClient.connect();
 
 // http server
@@ -46,26 +56,34 @@ app.get('/api/clusters', async (req, res) => {
   let x2 = parseFloat(req.query.bounds[2]);
   let y2 = parseFloat(req.query.bounds[3]);
   
-  // get rows with latest date
+  
+ // if table is daily, select table, other wise location_at is considered for filters
+ 
+ // get clusters in zoom extent for distinct devices with latest datatime 
+ // consider filter
 
   const clusterQuery = `
-      SELECT
-        cluster_id,
-        COUNT(cluster_id) AS point_count,
-        ST_CENTROID(ST_UNION(geom)) AS geom
-      FROM
-        (SELECT
-           ST_ClusterDBSCAN(geom, ${2*Math.PI/Math.pow(2,zoom-1)}, 1) OVER () cluster_id,
-           geom
-         FROM
+    SELECT
+      cluster_id,
+      MIN(id) AS id,
+      MIN(heading) AS heading,
+      COUNT(cluster_id) AS point_count,
+      ST_CENTROID(ST_UNION(geom)) AS geom
+    FROM
+      (SELECT DISTINCT ON (advertiser_id)
+          id,
+          ST_ClusterKMeans(geom,6) OVER () cluster_id,
+          heading,
+          geom
+       FROM
           locations
-         WHERE
+       WHERE
           geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
-        )
-        cluster_table
-      GROUP BY cluster_id
+       ORDER BY advertiser_id, location_at DESC
+      )  cluster_table
+    GROUP BY cluster_id
   `;
-
+   
    // get geojson query
    const geojsonQuery = `
       SELECT jsonb_build_object(
@@ -83,17 +101,17 @@ app.get('/api/clusters', async (req, res) => {
 
 
    try {
-    const result = await dbClient.query(geojsonQuery);
-    res.json({
-      'status': 'success',
-      'result': result.rows[0].geojson
-    });
-  } catch (err) {
+      const result = await dbClient.query(geojsonQuery);
+      res.json({
+        'status': 'success',
+        'result': result.rows[0].geojson
+      });
+   } catch (err) {
       res.json({
         'status': 'failed',
         'message': err
       });
-  }
+   }
 });
 
 function normalizePort(val) {

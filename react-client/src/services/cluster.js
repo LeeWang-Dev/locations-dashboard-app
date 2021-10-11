@@ -10,11 +10,11 @@ export const getClusters = async (params) => {
       params: params || {}
     }).then((response) => {
         result = response.data;
-      }).catch((err) => {
-        result = {
-          status: "failed",
-          message: "No internet connection",
-        };
-      });
+    }).catch((err) => {
+      result = {
+        status: "failed",
+        message: "No internet connection",
+      };
+    });
     return result;
   };
