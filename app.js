@@ -72,7 +72,7 @@ app.get('/api/clusters', async (req, res) => {
     FROM
       (SELECT DISTINCT ON (advertiser_id)
           id,
-          ST_ClusterKMeans(geom,6) OVER () cluster_id,
+          ST_ClusterDBSCAN(geom,${2*Math.PI/(Math.pow(2,zoom-1))},1) OVER () cluster_id,
           heading,
           geom
        FROM
