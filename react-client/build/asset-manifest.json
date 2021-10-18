@@ -1,27 +1,28 @@
 {
   "files": {
-    "main.css": "/static/css/main.6dea0f05.chunk.css",
-    "main.js": "/static/js/main.a13cb4fc.chunk.js",
-    "main.js.map": "/static/js/main.a13cb4fc.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.cb34afa3.js",
-    "runtime-main.js.map": "/static/js/runtime-main.cb34afa3.js.map",
-    "static/css/2.9345dda6.chunk.css": "/static/css/2.9345dda6.chunk.css",
-    "static/js/2.cdf33815.chunk.js": "/static/js/2.cdf33815.chunk.js",
-    "static/js/2.cdf33815.chunk.js.map": "/static/js/2.cdf33815.chunk.js.map",
-    "static/js/3.9fdc87e0.chunk.js": "/static/js/3.9fdc87e0.chunk.js",
-    "static/js/3.9fdc87e0.chunk.js.map": "/static/js/3.9fdc87e0.chunk.js.map",
+    "main.css": "/static/css/main.65a6e1d3.chunk.css",
+    "main.js": "/static/js/main.a7e356c5.chunk.js",
+    "main.js.map": "/static/js/main.a7e356c5.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.ecb6b720.js",
+    "runtime-main.js.map": "/static/js/runtime-main.ecb6b720.js.map",
+    "static/css/2.c1e694af.chunk.css": "/static/css/2.c1e694af.chunk.css",
+    "static/js/2.62d9ae1f.chunk.js": "/static/js/2.62d9ae1f.chunk.js",
+    "static/js/2.62d9ae1f.chunk.js.map": "/static/js/2.62d9ae1f.chunk.js.map",
+    "static/js/3.0ae1f21d.chunk.js": "/static/js/3.0ae1f21d.chunk.js",
+    "static/js/3.0ae1f21d.chunk.js.map": "/static/js/3.0ae1f21d.chunk.js.map",
     "index.html": "/index.html",
-    "static/css/2.9345dda6.chunk.css.map": "/static/css/2.9345dda6.chunk.css.map",
-    "static/css/main.6dea0f05.chunk.css.map": "/static/css/main.6dea0f05.chunk.css.map",
-    "static/js/2.cdf33815.chunk.js.LICENSE.txt": "/static/js/2.cdf33815.chunk.js.LICENSE.txt",
+    "static/css/2.c1e694af.chunk.css.map": "/static/css/2.c1e694af.chunk.css.map",
+    "static/css/main.65a6e1d3.chunk.css.map": "/static/css/main.65a6e1d3.chunk.css.map",
+    "static/js/2.62d9ae1f.chunk.js.LICENSE.txt": "/static/js/2.62d9ae1f.chunk.js.LICENSE.txt",
     "static/js/mapbox-gl-csp-worker.8b19ca65.worker.js": "/static/js/mapbox-gl-csp-worker.8b19ca65.worker.js",
-    "static/js/mapbox-gl-csp-worker.8b19ca65.worker.js.map": "/static/js/mapbox-gl-csp-worker.8b19ca65.worker.js.map"
+    "static/js/mapbox-gl-csp-worker.8b19ca65.worker.js.map": "/static/js/mapbox-gl-csp-worker.8b19ca65.worker.js.map",
+    "static/media/logo.3f900ba7.png": "/static/media/logo.3f900ba7.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.cb34afa3.js",
-    "static/css/2.9345dda6.chunk.css",
-    "static/js/2.cdf33815.chunk.js",
-    "static/css/main.6dea0f05.chunk.css",
-    "static/js/main.a13cb4fc.chunk.js"
+    "static/js/runtime-main.ecb6b720.js",
+    "static/css/2.c1e694af.chunk.css",
+    "static/js/2.62d9ae1f.chunk.js",
+    "static/css/main.65a6e1d3.chunk.css",
+    "static/js/main.a7e356c5.chunk.js"
   ]
 }
