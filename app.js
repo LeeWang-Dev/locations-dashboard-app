@@ -8,31 +8,24 @@ const {Client} = require('pg');
 const PORT = normalizePort(process.env.PORT || '8080');
 
 const dbClient = new Client({
-  user: 'sluaxjbbtvzxji',
-  host: 'ec2-35-171-171-27.compute-1.amazonaws.com',
-  database: 'd3ifv17g3mgqbn',
-  password: '01758eddd110dcd9ca82365e68be500f423a77b34f420057cd3732c73c01b95d',
+  user: 'leewang',
+  host: 'lee-instance.ciuz5stfwmcj.us-east-1.rds.amazonaws.com',
+  database: 'locations_db',
+  password: 'testing1234',
   port: 5432,
   ssl: {
     rejectUnauthorized: false,
   }
 });
 
-/*
-const dbClient = new Client({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'locations_db',
-  password: 'testing',
-  port: 5432
-});
-*/
-
 dbClient.connect();
 
 // http server
 
 const app = express();
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use(cors());
 
@@ -47,43 +40,53 @@ app.listen(PORT, () => {
    console.log(`Server is running on port ${PORT}.`);
 });
 
-app.get('/api/clusters', async (req, res) => {
-  
-  let zoom = parseInt(req.query.zoom);
+app.post('/api/clusters', async (req, res) => {
 
-  let x1 = parseFloat(req.query.bounds[0]);
-  let y1 = parseFloat(req.query.bounds[1]);
-  let x2 = parseFloat(req.query.bounds[2]);
-  let y2 = parseFloat(req.query.bounds[3]);
-  
-  
- // if table is daily, select table, other wise location_at is considered for filters
- 
- // get clusters in zoom extent for distinct devices with latest datatime 
- // consider filter
+  const { zoom, bounds } = req.body;
 
-  const clusterQuery = `
-    SELECT
-      cluster_id,
-      MIN(id) AS id,
-      MIN(heading) AS heading,
-      COUNT(cluster_id) AS point_count,
-      ST_CENTROID(ST_UNION(geom)) AS geom
-    FROM
-      (SELECT DISTINCT ON (advertiser_id)
-          id,
-          ST_ClusterDBSCAN(geom,${2*Math.PI/(Math.pow(2,zoom-1))},1) OVER () cluster_id,
-          heading,
-          geom
-       FROM
-          locations
-       WHERE
-          geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
-       ORDER BY advertiser_id, location_at DESC
-      )  cluster_table
-    GROUP BY cluster_id
-  `;
-   
+  let x1 = bounds[0];
+  let y1 = bounds[1];
+  let x2 = bounds[2];
+  let y2 = bounds[3];
+  
+  let query = '';
+
+  if(zoom>=15){
+    query = `
+        SELECT DISTINCT ON (advertiser_id)
+            id,
+            heading,
+            1 AS point_count,
+            geom
+        FROM
+            locations_2021_08_01
+        WHERE
+            geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
+        ORDER BY advertiser_id, location_at DESC
+    `;
+  }else if(zoom<15 && zoom>=13){
+    query = `
+      SELECT
+        MIN(id) AS id,
+        MIN(heading) AS heading,
+        COUNT(cluster_id) AS point_count,
+        ST_CENTROID(ST_UNION(geom)) AS geom
+      FROM
+        (SELECT DISTINCT ON (advertiser_id)
+            id,
+            ST_ClusterDBSCAN(geom,${2*Math.PI/(Math.pow(2,zoom-1))},1) OVER () cluster_id,
+            heading,
+            geom
+        FROM
+            locations_2021_08_01
+        WHERE
+            geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
+        ORDER BY advertiser_id, location_at DESC
+        )  cluster_table
+      GROUP BY cluster_id
+    `;
+  }
+  
    // get geojson query
    const geojsonQuery = `
       SELECT jsonb_build_object(
@@ -96,7 +99,7 @@ app.get('/api/clusters', async (req, res) => {
         'geometry',   ST_AsGeoJSON(geom)::jsonb,
         'properties', to_jsonb(inputs) - 'geom'
         ) AS feature
-        FROM (${clusterQuery}) inputs) features;
+        FROM (${query}) inputs) features;
     `;
 
 

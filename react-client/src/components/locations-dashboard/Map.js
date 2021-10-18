@@ -1,14 +1,24 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 
 import { makeStyles } from '@mui/styles';
 
-import ReactMapGL, { Source, Layer, ScaleControl } from 'react-map-gl';
+import ReactMapGL, { 
+           Source,
+           Layer,
+           ScaleControl,
+           NavigationControl
+       } from 'react-map-gl';
+
 import 'mapbox-gl/dist/mapbox-gl.css';
+import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import mapboxgl from "mapbox-gl";
+
+import Geocoder from 'react-map-gl-geocoder'
 
 import numeral from "numeral";
 
-import { MAPBOX_ACCESS_TOKEN } from "../../utils/constants.js";
+import { MAPBOX_ACCESS_TOKEN, DEFAULT_VIEWPORT } from "../../utils/settings.js";
 import { getClusters } from "../../services/cluster.js";
 
 import iconMarker from "../../assets/images/marker-icon.png";
@@ -16,7 +26,7 @@ import iconMarker from "../../assets/images/marker-icon.png";
 mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
 
 const useStyles = makeStyles({
-   mapContainer:{
+   mapDiv:{
       '& .mapboxgl-ctrl-logo': {
          display: 'none'
        }
@@ -26,11 +36,7 @@ const useStyles = makeStyles({
 function Map() {
     const classes = useStyles();
     const mapRef = useRef(null);
-    const [viewport, setViewport] = useState({
-        longitude: 0,
-        latitude: 0,
-        zoom: 1
-    });
+    const [viewport, setViewport] = useState(DEFAULT_VIEWPORT);
 
     const [clusterSource, setClusterSource] = useState({
         type: 'FeatureCollection',
@@ -38,9 +44,6 @@ function Map() {
     });
     //const [mapCursor, setMapCursor] = useState('default');
     
-    const handleViewport = (viewport) => {
-        setViewport(viewport);
-    }
     /*
     const handleMouseMove = (e) => {
         let features = mapRef.current.queryRenderedFeatures([[e.point[0] - 5, e.point[1] - 5], [e.point[0] + 5, e.point[1] + 5]]);
@@ -81,6 +84,13 @@ function Map() {
         map.on('moveend', mapDataCallback);
 
         function mapDataCallback(){
+            if(map.getZoom()<13){
+                setClusterSource({
+                    type: 'FeatureCollection',
+                    features:[]
+                });
+                return;
+            } 
             if(timeout){
                 clearTimeout(timeout);
             }
@@ -107,7 +117,7 @@ function Map() {
     }, []);
 
     return (
-        <ReactMapGL className={classes.mapContainer}
+        <ReactMapGL className={classes.mapDiv}
             {...viewport}    
             width="100%"
             height="100%"
@@ -122,7 +132,7 @@ function Map() {
             //preserveDrawingBuffer={true}
             //dragRotate={false}
             //transitionDuration={100}
-            onViewportChange={handleViewport}
+            onViewportChange={setViewport}
             interactiveLayerIds={['cluster-layer','unclustered-point-layer']}
             //getCursor={() => mapCursor}
             //onMouseMove={handleMouseMove}
@@ -170,12 +180,26 @@ function Map() {
                     layout={{
                         'icon-image': 'marker-icon',
                         'icon-size': 0.6,
-                        'icon-rotate': ["get","heading"]
+                        'icon-rotate': ["get","heading"],
+                        'icon-allow-overlap':true,
+                        'icon-ignore-placement': true,
+                        'icon-rotation-alignment':'map', // viewport
+                        'icon-pitch-alignment':'viewport'
                     }}
                 />
+                
             </Source>
-            <ScaleControl 
-                style={{bottom:10,left:10}} />
+            <Geocoder
+                mapRef={mapRef}
+                onViewportChange={setViewport}
+                mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
+                position="top-left"
+                placeholder="Search your city"
+                zoom={18}
+                //collapsed="true"
+            />
+            <NavigationControl style={{ bottom:10,left:10}}/>
+            <ScaleControl style={{bottom:10,right:10}} />
         </ReactMapGL>
     );
 }
