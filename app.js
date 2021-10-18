@@ -42,7 +42,9 @@ app.listen(PORT, () => {
 
 app.post('/api/clusters', async (req, res) => {
 
-  const { zoom, bounds } = req.body;
+  const { dateString, zoom, bounds } = req.body;
+
+  const tableName = getTableName(dateString);
 
   let x1 = bounds[0];
   let y1 = bounds[1];
@@ -59,7 +61,7 @@ app.post('/api/clusters', async (req, res) => {
             1 AS point_count,
             geom
         FROM
-            locations_2021_08_01
+            ${tableName}
         WHERE
             geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
         ORDER BY advertiser_id, location_at DESC
@@ -78,7 +80,7 @@ app.post('/api/clusters', async (req, res) => {
             heading,
             geom
         FROM
-            locations_2021_08_01
+            ${tableName}
         WHERE
             geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
         ORDER BY advertiser_id, location_at DESC
@@ -116,6 +118,33 @@ app.post('/api/clusters', async (req, res) => {
       });
    }
 });
+
+app.post('/api/marker', async (req, res) => {
+  const { date, id } = req.body;
+  var query = `
+     SELECT * FROM 2021_08_01 WHERE
+  `;
+  try {
+      const result = await dbClient.query(query);
+      res.json({
+        'status': 'success',
+        'result': result.rows[0].geojson
+      });
+  } catch (err) {
+      res.json({
+        'status': 'failed',
+        'message': err
+      });
+  }
+});
+
+function getTableName(dateString){
+  var dt = new Date(dateString);
+  var d = dt.getDate(dateString);
+  var m = dt.getMonth() + 1; //Month from 0 to 11
+  var y = dt.getFullYear();
+  return 'locations_' + y + '_' + (m<=9 ? '0' + m : m) + '_' + (d <= 9 ? '0' + d : d);
+}
 
 function normalizePort(val) {
    var port = parseInt(val, 10);

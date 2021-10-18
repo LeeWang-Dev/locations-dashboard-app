@@ -24,9 +24,9 @@ const useStyles = makeStyles({
     }
  });
  
- function Header() {
+ function Header(props) {
      const classes = useStyles();
-     const [selectedDate, setSelectedDate] = useState(new Date());
+     const { selectedDate, setSelectedDate } = props;
      return (
         <Grid container className={classes.header} spacing={3}>
             <Grid container item sm={4} justifyContent="center" alignItems="center">
@@ -43,7 +43,6 @@ const useStyles = makeStyles({
                         label="Locations Date"
                         value={selectedDate}
                         onChange={(newValue) => {
-                            console.log(newValue);
                             setSelectedDate(newValue);
                         }}
                         renderInput={(params) => <TextField {...params} />}

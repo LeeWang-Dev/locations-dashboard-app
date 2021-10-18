@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { makeStyles } from '@mui/styles';
 
@@ -31,16 +31,22 @@ const useStyles = makeStyles({
 
 function Main() {
     const classes = useStyles();
+    
+    const [selectedDate, setSelectedDate] = useState('2021-08-01');
+
     return (
        <div className={classes.root}>
-           <Header />
+           <Header 
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+           />
            <div className={classes.content}>
               <div className={classes.leftContainer}>
                 <Counts />
                 <Charts />  
               </div>
               <div className={classes.mapContainer}>
-                 <Map />
+                 <Map selectedDate={selectedDate} />
                </div>
            </div>
        </div>

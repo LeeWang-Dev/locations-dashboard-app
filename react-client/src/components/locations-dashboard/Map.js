@@ -33,8 +33,11 @@ const useStyles = makeStyles({
    }
 });
 
-function Map() {
+let timeout = null;
+
+function Map(props) {
     const classes = useStyles();
+    const { selectedDate } = props;
     const mapRef = useRef(null);
     const [viewport, setViewport] = useState(DEFAULT_VIEWPORT);
 
@@ -72,49 +75,58 @@ function Map() {
     useEffect(()=>{
 
         const map = mapRef.current.getMap();
-
-        let timeout = null;
-
+        
         map.loadImage(iconMarker, (error, image) => {
             if (error) throw error;
             // Add the image to the map style.
             map.addImage('marker-icon', image);
         });
 
-        map.on('moveend', mapDataCallback);
+    }, []);
 
-        function mapDataCallback(){
-            if(map.getZoom()<13){
+    useEffect(()=>{
+       const map = mapRef.current.getMap();
+       map.on('moveend', mapDataCallback);
+       mapDataCallback();
+    }, [selectedDate]);
+
+    const mapDataCallback = () => {
+        const map = mapRef.current.getMap();
+        if(map.getZoom()<13){
+            setClusterSource({
+                type: 'FeatureCollection',
+                features:[]
+            });
+            return;
+        } 
+        if(timeout){
+            clearTimeout(timeout);
+        }
+        timeout = setTimeout(async () => {
+           let res = await getClusters({
+               dateString:selectedDate.toString(),
+               zoom: map.getZoom(),
+               bounds: map.getBounds().toArray().flat()
+           });
+           if(res.status === 'success'){
+               if(res.result && res.result.features){
+                    res.result.features.forEach(feature => {
+                        var abbr = numeral(feature.properties["point_count"]).format("0.[0] a").toUpperCase();
+                        if(feature.properties["point_count"]>=1000){
+                           abbr += '+';
+                        }
+                        feature.properties["point_count_abbreviated"] = abbr;
+                    });
+                    setClusterSource(res.result);
+               }
+           }else{
                 setClusterSource({
                     type: 'FeatureCollection',
                     features:[]
                 });
-                return;
-            } 
-            if(timeout){
-                clearTimeout(timeout);
-            }
-            timeout = setTimeout(async () => {
-               let res = await getClusters({
-                   zoom: map.getZoom(),
-                   bounds: map.getBounds().toArray().flat()
-               });
-               if(res.status === 'success'){
-                   if(res.result && res.result.features){
-                        res.result.features.forEach(feature => {
-                            var abbr = numeral(feature.properties["point_count"]).format("0.[0] a").toUpperCase();
-                            if(feature.properties["point_count"]>=1000){
-                               abbr += '+';
-                            }
-                            feature.properties["point_count_abbreviated"] = abbr;
-                        });
-                        setClusterSource(res.result);
-                   }
-               }
-            }, 500);
-        }
-
-    }, []);
+           }
+        }, 500);
+    }
 
     return (
         <ReactMapGL className={classes.mapDiv}
@@ -126,7 +138,7 @@ function Map() {
             ref={mapRef}
             attributionControl={false}
             maxZoom={24}
-            //minZoom={16}
+            minZoom={13}
             //maxPitch={0}
             //dragPan={dragPan}
             //preserveDrawingBuffer={true}
