@@ -21,7 +21,7 @@ function Counts() {
                             Total Devices
                         </Typography>
                     </Grid>
-                   <Typography variant="h4" align="center">
+                   <Typography variant="h5" style={{marginLeft:20}}>
                        {numeral('1234').format("0,0")}
                    </Typography>
                 </Paper>
@@ -34,7 +34,7 @@ function Counts() {
                             Android
                         </Typography>
                     </Grid>
-                   <Typography variant="h4" align="center">
+                   <Typography variant="h5" style={{marginLeft:20}}>
                       {numeral('1234').format("0,0")}
                    </Typography>
                 </Paper>
@@ -47,7 +47,7 @@ function Counts() {
                             iPhone
                         </Typography>
                     </Grid>
-                   <Typography variant="h4" align="center">
+                   <Typography variant="h5" style={{marginLeft:20}}>
                       {numeral('1234').format("0,0")}
                    </Typography>
                 </Paper>

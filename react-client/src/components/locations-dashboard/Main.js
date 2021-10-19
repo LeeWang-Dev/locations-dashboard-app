@@ -21,11 +21,12 @@ const useStyles = makeStyles({
       backgroundColor:'#f1f6fa'
    },
    leftContainer:{
-     width:'40%',
+     width:540,
      padding:20
    },
    mapContainer:{
       flex:1,
+      position:'relative'
    }
 });
 
@@ -45,7 +46,7 @@ function Main() {
                 <Counts />
                 <Charts />  
               </div>
-              <div className={classes.mapContainer}>
+              <div className={classes.mapContainer} id="map-container">
                  <Map selectedDate={selectedDate} />
                </div>
            </div>

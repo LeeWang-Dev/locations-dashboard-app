@@ -8,7 +8,7 @@ let theme = createTheme({
     MuiPaper:{
       styleOverrides: {
         root: {
-          padding:16,
+          padding:10,
           boxShadow:'0px 24px 48px -4px #06192114'
         },
       },

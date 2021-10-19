@@ -119,16 +119,17 @@ app.post('/api/clusters', async (req, res) => {
    }
 });
 
-app.post('/api/marker', async (req, res) => {
-  const { date, id } = req.body;
+app.post('/api/marker/info', async (req, res) => {
+  const { dateString, id } = req.body;
+  const tableName = getTableName(dateString);
   var query = `
-     SELECT * FROM 2021_08_01 WHERE
+     SELECT * FROM ${tableName} WHERE id=${id}
   `;
   try {
       const result = await dbClient.query(query);
       res.json({
         'status': 'success',
-        'result': result.rows[0].geojson
+        'result': result.rows[0]
       });
   } catch (err) {
       res.json({

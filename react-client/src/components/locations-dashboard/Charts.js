@@ -1,8 +1,6 @@
 import React, { useState} from 'react';
 
-import { makeStyles } from '@mui/styles';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
@@ -25,9 +23,6 @@ function Charts() {
                 </ToggleButton>
                 <ToggleButton value="category_2" aria-label="Wall Details">
                    Category 2
-                </ToggleButton>
-                <ToggleButton value="category_3" aria-label="Roof Details">
-                   Category 3
                 </ToggleButton>
             </ToggleButtonGroup>
        </Grid>

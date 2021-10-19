@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 import { makeStyles } from '@mui/styles';
+import LinearProgress from '@mui/material/LinearProgress';
 
 import ReactMapGL, { 
            Source,
@@ -21,7 +22,10 @@ import numeral from "numeral";
 import { MAPBOX_ACCESS_TOKEN, DEFAULT_VIEWPORT } from "../../utils/settings.js";
 import { getClusters } from "../../services/cluster.js";
 
+
 import iconMarker from "../../assets/images/marker-icon.png";
+
+import MarkerInfo from "./MarkerInfo.js";
 
 mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
 
@@ -45,19 +49,11 @@ function Map(props) {
         type: 'FeatureCollection',
         features:[]
     });
-    //const [mapCursor, setMapCursor] = useState('default');
+    const [showLoading, setShowLoading] = useState(true);
     
-    /*
-    const handleMouseMove = (e) => {
-        let features = mapRef.current.queryRenderedFeatures([[e.point[0] - 5, e.point[1] - 5], [e.point[0] + 5, e.point[1] + 5]]);
-        if(features.length>0){
-           setMapCursor('pointer');
-        }else{
-           setMapCursor('default');
-        }
-    }
-    */ 
-    const handleClick = (e) => {
+    const [markerInfo, setMarkerInfo] = useState(false);
+
+    const handleClick = async (e) => {
         if(e.features && e.features.length>0){
             const feature = e.features[0];
             if(feature.layer.id === 'cluster-layer'){
@@ -68,6 +64,23 @@ function Map(props) {
                     zoom: viewport.zoom + 1,
                     transitionDuration: 500
                 });
+            }else if(feature.layer.id === 'unclustered-point-layer'){
+                setMarkerInfo({
+                    ...markerInfo,
+                    open:true,
+                    id:feature.properties["id"]
+                });
+                /*
+                let res = await getMarkerInfo({
+                    dateString:selectedDate.toString(),
+                    id:feature.properties["id"]
+                });
+                if(res.status === 'success'){
+                    setMarkerInfo(res.result);
+                }else{
+                    setMarkerInfo(null);
+                }
+                */
             }
         }
     }
@@ -85,9 +98,13 @@ function Map(props) {
     }, []);
 
     useEffect(()=>{
+
        const map = mapRef.current.getMap();
+
        map.on('moveend', mapDataCallback);
+
        mapDataCallback();
+
     }, [selectedDate]);
 
     const mapDataCallback = () => {
@@ -103,11 +120,13 @@ function Map(props) {
             clearTimeout(timeout);
         }
         timeout = setTimeout(async () => {
+           setShowLoading(true);
            let res = await getClusters({
                dateString:selectedDate.toString(),
                zoom: map.getZoom(),
                bounds: map.getBounds().toArray().flat()
            });
+           setShowLoading(false);
            if(res.status === 'success'){
                if(res.result && res.result.features){
                     res.result.features.forEach(feature => {
@@ -139,21 +158,9 @@ function Map(props) {
             attributionControl={false}
             maxZoom={24}
             minZoom={13}
-            //maxPitch={0}
-            //dragPan={dragPan}
-            //preserveDrawingBuffer={true}
-            //dragRotate={false}
-            //transitionDuration={100}
             onViewportChange={setViewport}
             interactiveLayerIds={['cluster-layer','unclustered-point-layer']}
-            //getCursor={() => mapCursor}
-            //onMouseMove={handleMouseMove}
             onClick={handleClick}
-            //onMouseDown={handleMouseDown}
-            //onMouseUp={handleMouseUp}
-            //onTouchStart={handleMouseDown}
-            //onTouchMove={handleMouseMove}
-            //onTouchEnd={handleMouseUp}
         >
             <Source
                 id="clusterSource"
@@ -212,6 +219,14 @@ function Map(props) {
             />
             <NavigationControl style={{ bottom:10,left:10}}/>
             <ScaleControl style={{bottom:10,right:10}} />
+            {
+            markerInfo.open && 
+                <MarkerInfo 
+                   markerInfo={markerInfo}    
+                   setMarkerInfo={setMarkerInfo}
+                />
+            }
+            {showLoading && <LinearProgress />}
         </ReactMapGL>
     );
 }
