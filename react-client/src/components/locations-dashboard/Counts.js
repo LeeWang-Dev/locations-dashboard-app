@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React from 'react';
 
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
@@ -10,10 +10,11 @@ import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 
 import numeral from "numeral";
 
-function Counts() {
+function Counts(props) {
+    const { counts } = props;
     return(
        <Grid container spacing={2} flexDirection="row" style={{marginBottom:50}}>
-           <Grid item lg={4} md={6} xs={12}>
+           <Grid item sm={4} xs={12}>
                <Paper>
                     <Grid container alignItems="center">
                         <ShareLocationIcon color="primary" />
@@ -22,11 +23,11 @@ function Counts() {
                         </Typography>
                     </Grid>
                    <Typography variant="h5" style={{marginLeft:20}}>
-                       {numeral('1234').format("0,0")}
+                       {counts["TOTAL"]?numeral(counts["TOTAL"]).format("0,0"):0}
                    </Typography>
                 </Paper>
            </Grid>
-           <Grid item lg={4} md={6} xs={12}>
+           <Grid item sm={4} xs={12}>
                 <Paper>
                     <Grid container alignItems="center">
                         <PhoneAndroidIcon color="primary" />
@@ -35,11 +36,11 @@ function Counts() {
                         </Typography>
                     </Grid>
                    <Typography variant="h5" style={{marginLeft:20}}>
-                      {numeral('1234').format("0,0")}
+                      {counts["AAID"]?numeral(counts["AAID"]).format("0,0"):0}
                    </Typography>
                 </Paper>
            </Grid>
-           <Grid item lg={4} md={6} xs={12}>
+           <Grid item sm={4} xs={12}>
                 <Paper>
                     <Grid container alignItems="center">
                         <PhoneIphoneIcon color="secondary" />
@@ -48,7 +49,7 @@ function Counts() {
                         </Typography>
                     </Grid>
                    <Typography variant="h5" style={{marginLeft:20}}>
-                      {numeral('1234').format("0,0")}
+                      {counts["IDFA"]?numeral(counts["IDFA"]).format("0,0"):0}
                    </Typography>
                 </Paper>
            </Grid>

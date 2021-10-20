@@ -42,7 +42,13 @@ app.listen(PORT, () => {
 
 app.post('/api/clusters', async (req, res) => {
 
-  const { dateString, zoom, bounds } = req.body;
+  const { dateString, timeRange, zoom, bounds } = req.body;
+
+  let d = dateString.split("-");
+
+  let t0 = Date.UTC(d[0],parseInt(d[1])-1,d[2])/1000
+  let t1 = t0 + timeRange[0]*60*60;
+  let t2 = t0 + timeRange[1]*60*60;
 
   const tableName = getTableName(dateString);
 
@@ -64,6 +70,7 @@ app.post('/api/clusters', async (req, res) => {
             ${tableName}
         WHERE
             geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
+            AND (location_at>=${t1} AND location_at<${t2})
         ORDER BY advertiser_id, location_at DESC
     `;
   }else if(zoom<15 && zoom>=13){
@@ -83,6 +90,7 @@ app.post('/api/clusters', async (req, res) => {
             ${tableName}
         WHERE
             geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
+            AND (location_at>=${t1} AND location_at<${t2})
         ORDER BY advertiser_id, location_at DESC
         )  cluster_table
       GROUP BY cluster_id
@@ -119,6 +127,48 @@ app.post('/api/clusters', async (req, res) => {
    }
 });
 
+app.post('/api/counts', async (req, res) => {
+  const { dateString, timeRange, bounds } = req.body;
+
+  let d = dateString.split("-");
+
+  let t0 = Date.UTC(d[0],parseInt(d[1])-1,d[2])/1000
+  let t1 = t0 + timeRange[0]*60*60;
+  let t2 = t0 + timeRange[1]*60*60;
+
+  const tableName = getTableName(dateString);
+
+  let x1 = bounds[0];
+  let y1 = bounds[1];
+  let x2 = bounds[2];
+  let y2 = bounds[3];
+  
+  let query = `
+     SELECT 
+        platform,
+        count(platform) AS count
+     FROM
+       ${tableName}
+     WHERE
+        geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
+        AND (location_at>=${t1} AND location_at<${t2})
+     GROUP BY platform   
+  `;
+
+  try {
+      const result = await dbClient.query(query);
+      res.json({
+        'status': 'success',
+        'result': result.rows
+      });
+  } catch (err) {
+      res.json({
+        'status': 'failed',
+        'message': err
+      });
+  }
+});
+
 app.post('/api/marker/info', async (req, res) => {
   const { dateString, id } = req.body;
   const tableName = getTableName(dateString);
@@ -140,11 +190,7 @@ app.post('/api/marker/info', async (req, res) => {
 });
 
 function getTableName(dateString){
-  var dt = new Date(dateString);
-  var d = dt.getDate(dateString);
-  var m = dt.getMonth() + 1; //Month from 0 to 11
-  var y = dt.getFullYear();
-  return 'locations_' + y + '_' + (m<=9 ? '0' + m : m) + '_' + (d <= 9 ? '0' + d : d);
+  return 'locations_' + dateString.split("-").join("_");
 }
 
 function normalizePort(val) {

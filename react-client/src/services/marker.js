@@ -5,7 +5,7 @@ export const getMarkerInfo = async (params) => {
     var result = null;
     
     let url = `${BASE_URL}/api/marker/info`;
-  
+
     await axios.post(url, params).then((response) => {
         result = response.data;
     }).catch((err) => {
@@ -15,5 +15,5 @@ export const getMarkerInfo = async (params) => {
       };
     });
     return result;
-  };
+};
 

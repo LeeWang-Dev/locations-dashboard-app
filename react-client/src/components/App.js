@@ -13,6 +13,23 @@ let theme = createTheme({
         },
       },
     },
+    MuiTextField:{
+      styleOverrides: {
+        root: {
+          paddingLeft:20,
+          paddingRight:20,
+          borderRadius:72,
+          backgroundColor:'#f1f6fa'
+        },
+      },
+    },
+    MuiOutlinedInput:{
+      styleOverrides: {
+        notchedOutline: {
+          border:0
+        },
+      },
+    },
     MuiToggleButtonGroup:{
       styleOverrides: {
         root: {
@@ -52,7 +69,21 @@ let theme = createTheme({
           }
         }
       }
-    }
+    },
+    MuiInputAdornment:{
+      styleOverrides: {
+        root:{
+          color:'#ff844b'
+        }
+      }
+    },
+    MuiIconButton:{
+      styleOverrides: {
+        root:{
+          color:'#ff844b'
+        }
+      }
+    },  
   }
 });
 

@@ -4,28 +4,27 @@ import React, { useState, useEffect, useRef } from 'react';
 import { makeStyles } from '@mui/styles';
 import LinearProgress from '@mui/material/LinearProgress';
 
+
 import ReactMapGL, { 
            Source,
            Layer,
            ScaleControl,
-           NavigationControl
+           NavigationControl,
+           FlyToInterpolator
        } from 'react-map-gl';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
-import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import mapboxgl from "mapbox-gl";
-
-import Geocoder from 'react-map-gl-geocoder'
 
 import numeral from "numeral";
 
 import { MAPBOX_ACCESS_TOKEN, DEFAULT_VIEWPORT } from "../../utils/settings.js";
 import { getClusters } from "../../services/cluster.js";
-
+import { getCounts } from "../../services/counts.js";
 
 import iconMarker from "../../assets/images/marker-icon.png";
 
-import MarkerInfo from "./MarkerInfo.js";
+import MarkerPanel from "./MarkerPanel.js";
 
 mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
 
@@ -41,7 +40,13 @@ let timeout = null;
 
 function Map(props) {
     const classes = useStyles();
-    const { selectedDate } = props;
+    const { 
+       searchLocation,
+       selectedDate,
+       timeRange,
+       setCounts
+    } = props;
+
     const mapRef = useRef(null);
     const [viewport, setViewport] = useState(DEFAULT_VIEWPORT);
 
@@ -98,6 +103,20 @@ function Map(props) {
     }, []);
 
     useEffect(()=>{
+        if(searchLocation){
+            setViewport({
+               ...viewport,
+               latitude: searchLocation.lat,
+               longitude: searchLocation.lng,
+               zoom: 15,
+               transitionDuration: 4000,
+               transitionInterpolator: new FlyToInterpolator(),
+               //transitionEasing: d3.easeCubic
+            });
+        }
+    }, [searchLocation]);
+
+    useEffect(()=>{
 
        const map = mapRef.current.getMap();
 
@@ -105,7 +124,7 @@ function Map(props) {
 
        mapDataCallback();
 
-    }, [selectedDate]);
+    }, [selectedDate, timeRange]);
 
     const mapDataCallback = () => {
         const map = mapRef.current.getMap();
@@ -122,7 +141,8 @@ function Map(props) {
         timeout = setTimeout(async () => {
            setShowLoading(true);
            let res = await getClusters({
-               dateString:selectedDate.toString(),
+               dateString:selectedDate,
+               timeRange: timeRange,
                zoom: map.getZoom(),
                bounds: map.getBounds().toArray().flat()
            });
@@ -143,6 +163,22 @@ function Map(props) {
                     type: 'FeatureCollection',
                     features:[]
                 });
+           }
+           res = await getCounts({
+                dateString:selectedDate,
+                timeRange: timeRange,
+                bounds: map.getBounds().toArray().flat()
+           });
+           if(res.status === 'success'){
+              var newCounts = [];
+              newCounts['TOTAL'] = 0;
+              res.result.forEach(row=>{
+                  newCounts[row.platform] = row.count;
+                  newCounts['TOTAL'] += parseInt(row.count);
+              });
+              setCounts(newCounts);
+           }else{
+              setCounts([]);
            }
         }, 500);
     }
@@ -208,23 +244,14 @@ function Map(props) {
                 />
                 
             </Source>
-            <Geocoder
-                mapRef={mapRef}
-                onViewportChange={setViewport}
-                mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
-                position="top-left"
-                placeholder="Search your city"
-                zoom={18}
-                //collapsed="true"
-            />
-            <NavigationControl style={{ bottom:10,left:10}}/>
-            <ScaleControl style={{bottom:10,right:10}} />
+            <NavigationControl style={{ top:10,right:10}}/>
+            <ScaleControl style={{bottom:10,left:10}} />
             {
-            markerInfo.open && 
-                <MarkerInfo 
-                   markerInfo={markerInfo}    
-                   setMarkerInfo={setMarkerInfo}
-                />
+                markerInfo.open && (
+                  <MarkerPanel
+                    markerInfo={markerInfo}    
+                    setMarkerInfo={setMarkerInfo}
+                  />)
             }
             {showLoading && <LinearProgress />}
         </ReactMapGL>
