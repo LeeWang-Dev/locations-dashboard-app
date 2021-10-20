@@ -8,6 +8,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import ReactMapGL, { 
            Source,
            Layer,
+           Marker,
            ScaleControl,
            NavigationControl,
            FlyToInterpolator
@@ -23,6 +24,7 @@ import { getClusters } from "../../services/cluster.js";
 import { getCounts } from "../../services/counts.js";
 
 import iconMarker from "../../assets/images/marker-icon.png";
+import iconSearch from "../../assets/images/search-marker.png";
 
 import MarkerPanel from "./MarkerPanel.js";
 
@@ -33,6 +35,20 @@ const useStyles = makeStyles({
       '& .mapboxgl-ctrl-logo': {
          display: 'none'
        }
+   },
+   addressLabel:{
+      display:'flex',
+      alignItems:'center',
+      padding:'0 10px',
+      width:240,
+      height:60,
+      color:'#000',
+      fontSize:14,
+      lineHeight:'14px',
+      //borderRadius:4,
+      borderLeft:'2px solid #ff0000',
+      backgroundColor:'rgba(255,255,255,0.8)',
+      pointerEvents:'none'
    }
 });
 
@@ -42,6 +58,7 @@ function Map(props) {
     const classes = useStyles();
     const { 
        searchLocation,
+       address,
        selectedDate,
        timeRange,
        setCounts
@@ -109,9 +126,9 @@ function Map(props) {
                latitude: searchLocation.lat,
                longitude: searchLocation.lng,
                zoom: 15,
-               transitionDuration: 4000,
-               transitionInterpolator: new FlyToInterpolator(),
-               //transitionEasing: d3.easeCubic
+               //transitionDuration: 4000,
+               //transitionInterpolator: new FlyToInterpolator(),
+               ////transitionEasing: d3.easeCubic
             });
         }
     }, [searchLocation]);
@@ -246,6 +263,16 @@ function Map(props) {
             </Source>
             <NavigationControl style={{ top:10,right:10}}/>
             <ScaleControl style={{bottom:10,left:10}} />
+            {(searchLocation && address) && (
+                <>
+                <Marker longitude={searchLocation.lng} latitude={searchLocation.lat} offsetLeft={-16} offsetTop={-32}>
+                    <img src={iconSearch} alt="marker" />
+                </Marker>
+                <Marker longitude={searchLocation.lng} latitude={searchLocation.lat} offsetLeft={16} offsetTop={-46}>
+                    <div className={classes.addressLabel}>{address}</div>
+                </Marker>
+                </>
+            )}
             {
                 markerInfo.open && (
                   <MarkerPanel

@@ -17,7 +17,7 @@ const useStyles = makeStyles({
            paddingBottom:5,
            paddingLeft:40,
            paddingRight:40,
-           backgroundColor:'rgba(255,255,255,0.9)',
+           backgroundColor:'rgba(255,255,255,0.7)',
         },
         '&.MuiSlider-root':{
           //position:'absolute'

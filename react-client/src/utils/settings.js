@@ -8,5 +8,7 @@ export const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoibGVld2FuZ2RldiIsImEiOiJja2tnbDU2c
 export const DEFAULT_VIEWPORT = {
     longitude: -79.3966596,
     latitude: 43.6565291,
-    zoom: 11
+    zoom: 13
 }
+
+export const google = window.google;
