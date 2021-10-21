@@ -42,15 +42,12 @@ app.listen(PORT, () => {
 
 app.post('/api/clusters', async (req, res) => {
 
-  const { dateString, timeRange, zoom, bounds } = req.body;
+  const { date, timeRange, zoom, bounds } = req.body;
 
-  let d = dateString.split("/");
+  let t1 = timeRange[0];
+  let t2 = timeRange[1];
 
-  let t0 = Date.UTC(d[2],parseInt(d[0])-1,d[1])/1000
-  let t1 = t0 + timeRange[0]*60*60;
-  let t2 = t0 + timeRange[1]*60*60;
-
-  const tableName = getTableName(dateString);
+  const tableName = getTableName(date);
 
   let x1 = bounds[0];
   let y1 = bounds[1];
@@ -128,15 +125,12 @@ app.post('/api/clusters', async (req, res) => {
 });
 
 app.post('/api/counts', async (req, res) => {
-  const { dateString, timeRange, bounds } = req.body;
+  const { date, timeRange, bounds } = req.body;
 
-  let d = dateString.split("/");
+  let t1 = timeRange[0];
+  let t2 = timeRange[1];
 
-  let t0 = Date.UTC(d[2],parseInt(d[0])-1,d[1])/1000
-  let t1 = t0 + timeRange[0]*60*60;
-  let t2 = t0 + timeRange[1]*60*60;
-
-  const tableName = getTableName(dateString);
+  const tableName = getTableName(date);
 
   let x1 = bounds[0];
   let y1 = bounds[1];
@@ -170,8 +164,8 @@ app.post('/api/counts', async (req, res) => {
 });
 
 app.post('/api/marker/info', async (req, res) => {
-  const { dateString, id } = req.body;
-  const tableName = getTableName(dateString);
+  const { date, id } = req.body;
+  const tableName = getTableName(date);
   var query = `
      SELECT * FROM ${tableName} WHERE id=${id}
   `;
@@ -189,9 +183,39 @@ app.post('/api/marker/info', async (req, res) => {
   }
 });
 
+app.post('/api/marker/tracking', async (req, res) => {
+  const { date, id } = req.body;
+  const tableName = getTableName(date);
+  var query = `
+     SELECT 
+      id, latitude, longitude,
+      altitude, heading,
+      speed, horizontal_accuracy, vertical_accuracy
+     FROM
+      ${tableName}
+     WHERE
+      advertiser_id=(
+        SELECT advertiser_id FROM ${tableName} WHERE id=${id}
+      )
+     ORDER BY location_at DESC 
+  `;
+  try {
+      const result = await dbClient.query(query);
+      res.json({
+        'status': 'success',
+        'result': result.rows
+      });
+  } catch (err) {
+      res.json({
+        'status': 'failed',
+        'message': err
+      });
+  }
+});
+
 app.post('/api/days', async (req, res) => {
-  const { dateString } = req.body;
-  var dateArray = dateString.split('/');
+  const { date } = req.body;
+  var dateArray = date.split('/');
   var query = `
      SELECT 
        tablename 

@@ -19,7 +19,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import imgLogo from "../../assets/images/logo.png";
 
 import { google } from "./../../utils/settings.js";
-import { dateFormat } from "../../utils/util.js";
+import { dateFormat, secondsFromDate } from '../../utils/util.js';
 import { getDays } from "../../services/days.js";
 
 const useStyles = makeStyles({
@@ -61,7 +61,7 @@ const useStyles = makeStyles({
            clearTimeout(timeout);
         }
         timeout = setTimeout(async () => {
-            let res = await getDays({dateString:dateFormat(date)});
+            let res = await getDays({date:dateFormat(date)});
             setIsLoading(false);
             if(res.status === 'success'){
               setHighlightedDays(res.result);
@@ -139,9 +139,13 @@ const useStyles = makeStyles({
                             );
                           }}
                           onMonthChange={handleMonthChange}
+                          onYearChange={handleMonthChange}
                           onChange={(newValue) => {
                             setSelectedDate(newValue);
-                            setTimeRange([0,24]);
+                            setTimeRange([
+                                secondsFromDate(dateFormat(newValue)),
+                                secondsFromDate(dateFormat(newValue))+86399
+                            ]);
                           }}
                     />
                 </LocalizationProvider>

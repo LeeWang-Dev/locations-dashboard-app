@@ -8,28 +8,48 @@ import Typography from '@mui/material/Typography';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import CircularProgress from '@mui/material/CircularProgress';
+import Slider from '@mui/material/Slider';
 
-import { getMarkerInfo } from "../../services/marker.js";
+import ReactMapGL, { 
+    Source,
+    Layer,
+    Marker,
+    ScaleControl,
+    NavigationControl,
+} from 'react-map-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import mapboxgl from "mapbox-gl";
+import { MAPBOX_ACCESS_TOKEN } from "../../utils/settings.js";
+
+import iconMarker from "../../assets/images/marker-icon.png";
+
+import { timeFormat, secondsFromDate } from "../../utils/util.js";
+import { getMarkerInfo, getTracking } from "../../services/marker.js";
+
+mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
+
 
 const useStyles = makeStyles({
-    markerInfoDrawer:{
+    drawer:{
        '& .MuiBackdrop-root':{
            //position:'absolute'
            //backgroundColor:'transparent' //'rgba(0,0,0,0.2)'
        },
        '&>.MuiPaper-root':{
            //position: 'absolute',
-           width: '40%',
+           display:'flex',
+           flexDirection:'column',
+           width: '50%',
            minWidth:400,
-           paddingLeft:40,
-           paddingRight:40,
-           backgroundColor:'#f1f6fa'
+           padding:'20px 40px',
+           backgroundColor:'#f1f6fa',
+           boxSizing:'border-box'
        }
     },
     drawerHeader:{
       display:'flex',
       flexDirection:'row',
-      paddingTop:30,
+      paddingTop:20,
       paddingBottom:16,
       marginBottom:20,
       borderBottom:'1px solid #e3ebf1'
@@ -44,6 +64,34 @@ const useStyles = makeStyles({
         paddingBottom:10,
         marginBottom:20,
         borderBottom:'1px solid #e3ebf1'
+    },
+    mapContainer:{
+       flex:1,
+       position:'relative'
+    },
+    mapDiv:{
+        border:'1px solid #e3ebf1',
+       '& .mapboxgl-ctrl-logo': {
+           display: 'none'
+        }
+    },
+    timeslider:{
+        position:'absolute',
+        bottom:10,
+        left:0,
+        right:0,
+        '& .MuiPaper-root':{
+           width:'70%',
+           paddingTop:10,
+           paddingBottom:5,
+           paddingLeft:40,
+           paddingRight:40,
+           backgroundColor:'rgba(255,255,255,0.7)',
+        },
+        '&.MuiSlider-root':{
+          //position:'absolute'
+          width:'60%'
+       }
     }
  });
 
@@ -56,6 +104,16 @@ function MarkerPanel(props) {
 
     const [toggleValue, setToggleValue] = useState('properties');
     const [markerInfo, setMarkerInfo] = useState(null);
+    const [trackSource, setTrackSource] = useState(null);
+    //const [interpolateLine, setInterpolateSource] = useState(null);
+
+    const [viewport, setViewport] = useState({
+        longitude: markerPanelInfo.geometry.coordinates[0],
+        latitude: markerPanelInfo.geometry.coordinates[1],
+        zoom:15
+    });
+    
+    const [sliderValue, setSliderValue] = useState(86400);
 
     const toggleDrawer = (open) => (event) => {
         if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -67,27 +125,50 @@ function MarkerPanel(props) {
         });
     };
 
+    const handleToggleButton = (event, newValue) => {
+        if(newValue !== null){
+          setToggleValue(newValue);
+        }
+    }
+    
+    const handleSliderChange = (event, newValue) => {
+        setSliderValue(newValue);
+    };
+
    useEffect(()=>{
       
-      getMarkerInfoCallback();
+      fetchMarkerInfo();
         
    }, [markerPanelInfo]);
 
-   const getMarkerInfoCallback = async () => {
+   const fetchMarkerInfo = async () => {
         let res = await getMarkerInfo({
-            dateString: markerPanelInfo.date,
+            date: markerPanelInfo.date,
             id: markerPanelInfo.id
         });
         if(res.status === 'success'){
             setMarkerInfo(res.result);
+            setSliderValue(parseInt(res.result.location_at));
+            //res.result.location_at
         }else{
             setMarkerInfo(null);
+        }
+        res = await getTracking({
+            date: markerPanelInfo.date,
+            id: markerPanelInfo.id
+        });
+        //console.log(res);
+        if(res.status === 'success'){
+           //setTrackSource(res.result);
+
+        }else{
+           //setTrackSource(null);
         }
    }
 
    return (
         <Drawer
-            className={classes.markerInfoDrawer}
+            className={classes.drawer}
             anchor="left"
             open={true}
             onClose={toggleDrawer(false)}
@@ -98,7 +179,7 @@ function MarkerPanel(props) {
                 </Typography>
                 <ToggleButtonGroup 
                     value={toggleValue} exclusive
-                    onChange={(e, newValue) => setToggleValue(newValue)} aria-label="marker button group"
+                    onChange={handleToggleButton} aria-label="marker button group"
                 >
                     <ToggleButton value="properties" aria-label="Properties">
                        Properties
@@ -108,7 +189,8 @@ function MarkerPanel(props) {
                     </ToggleButton>
                 </ToggleButtonGroup>
           </Grid>
-          {markerInfo?
+          {toggleValue === 'properties' && (
+              markerInfo?
                 <>
                 <Paper className={classes.paper}>
                     <Grid container className={classes.paperHeader}>
@@ -282,6 +364,56 @@ function MarkerPanel(props) {
                <Grid container justifyContent="center">
                   <CircularProgress />
                </Grid>
+          )}
+          {
+              toggleValue === 'tracking' && (
+                <div className={classes.mapContainer}>
+                    <ReactMapGL className={classes.mapDiv}
+                        {...viewport}    
+                        width="100%"
+                        height="100%"
+                        mapStyle="mapbox://styles/mapbox/light-v10"
+                        mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
+                        attributionControl={false}
+                        maxZoom={24}
+                        minZoom={14}
+                        onViewportChange={setViewport}
+                    >
+                        
+                       <NavigationControl style={{ top:10,left:10}}/>
+                    </ReactMapGL>
+                    <Grid container className={classes.timeslider} justifyContent="center">
+                        <Paper>
+                            <Typography variant="h6" align="center">
+                                {`UTC ${timeFormat(sliderValue-secondsFromDate(markerPanelInfo.date))} ${markerPanelInfo.date}`}
+                            </Typography>
+                            <Slider
+                                aria-label="track time"
+                                value={sliderValue}
+                                onChange={handleSliderChange}
+                                defaultValue={86399}
+                                min={secondsFromDate(markerPanelInfo.date)}
+                                max={secondsFromDate(markerPanelInfo.date)+86399}
+                                setp={10}
+                                //valueLabelDisplay="auto"
+                                style={{color:'#ff844b'}}
+                                marks = {[
+                                    { value: secondsFromDate(markerPanelInfo.date), label: '0'},
+                                    { value: secondsFromDate(markerPanelInfo.date)+3*3600, label: '3'},
+                                    { value: secondsFromDate(markerPanelInfo.date)+6*3600, label: '6'},
+                                    { value: secondsFromDate(markerPanelInfo.date)+9*3600, label: '9'},
+                                    { value: secondsFromDate(markerPanelInfo.date)+12*3600, label: '12'},
+                                    { value: secondsFromDate(markerPanelInfo.date)+15*3600, label: '15'},
+                                    { value: secondsFromDate(markerPanelInfo.date)+18*3600, label: '18'},
+                                    { value: secondsFromDate(markerPanelInfo.date)+21*3600, label: '21'},
+                                    { value: secondsFromDate(markerPanelInfo.date)+24*3600, label: '24'}
+                                ]}
+                                
+                            />
+                        </Paper>
+                    </Grid>
+                </div>  
+              )
           }
         </Drawer>
    );

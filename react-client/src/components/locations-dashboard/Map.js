@@ -91,7 +91,8 @@ function Map(props) {
                     ...markerPanelInfo,
                     open: true,
                     date: dateFormat(selectedDate),
-                    id: feature.properties["id"]
+                    id: feature.properties["id"],
+                    geometry: feature.geometry
                 });
                
             }
@@ -149,7 +150,7 @@ function Map(props) {
         timeout = setTimeout(async () => {
            setShowLoading(true);
            let res = await getClusters({
-               dateString: dateFormat(selectedDate),
+               date: dateFormat(selectedDate),
                timeRange: timeRange,
                zoom: map.getZoom(),
                bounds: map.getBounds().toArray().flat()
@@ -173,7 +174,7 @@ function Map(props) {
                 });
            }
            res = await getCounts({
-                dateString: dateFormat(selectedDate),
+                date: dateFormat(selectedDate),
                 timeRange: timeRange,
                 bounds: map.getBounds().toArray().flat()
            });
