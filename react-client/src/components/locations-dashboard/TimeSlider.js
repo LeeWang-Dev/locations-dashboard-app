@@ -1,9 +1,11 @@
-import React, { useState} from 'react';
+import React from 'react';
 import { makeStyles } from '@mui/styles';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
+
+import { dateFormat } from "../../utils/util.js";
 
 const useStyles = makeStyles({
     timeslider:{
@@ -54,7 +56,7 @@ function TimeSlider(props){
         <Grid container className={classes.timeslider} justifyContent="center">
             <Paper>
                <Typography variant="h6" align="center">
-                  {`UTC ${timeRange[0]}:00 - ${timeRange[1]}:00 ${selectedDate}`}
+                  {`UTC ${timeRange[0]}:00 - ${timeRange[1]}:00 ${dateFormat(selectedDate)}`}
                </Typography>
                <Slider
                  getAriaLabel={() => 'Time range'}
@@ -65,7 +67,8 @@ function TimeSlider(props){
                  max={24}
                  valueLabelDisplay="auto"
                  marks={marks}
-                 color="primary"
+                 //color="primary"
+                 style={{color:'#ff844b'}}
                />
             </Paper>
         </Grid>

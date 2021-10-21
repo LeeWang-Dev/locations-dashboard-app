@@ -36,7 +36,7 @@ function Main() {
     
     const [searchLocation, setSearchLocation] = useState(null);
     const [address, setAddress] = useState(null);
-    const [selectedDate, setSelectedDate] = useState('2021-08-01');
+    const [selectedDate, setSelectedDate] = useState(new Date('2021-08-01'));
     const [timeRange, setTimeRange] = useState([0,24]);
     const [counts, setCounts] = useState([]);
 

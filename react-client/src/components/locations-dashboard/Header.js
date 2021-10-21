@@ -1,14 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { makeStyles } from '@mui/styles';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Badge from '@mui/material/Badge';
 
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
+import CalendarPickerSkeleton from '@mui/lab/CalendarPickerSkeleton';
+import PickersDay from '@mui/lab/PickersDay';
 
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
@@ -16,6 +19,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import imgLogo from "../../assets/images/logo.png";
 
 import { google } from "./../../utils/settings.js";
+import { dateFormat } from "../../utils/util.js";
+import { getDays } from "../../services/days.js";
 
 const useStyles = makeStyles({
     header:{
@@ -30,6 +35,8 @@ const useStyles = makeStyles({
     }
  });
  
+ let timeout = null;
+
  function Header(props) {
      const classes = useStyles();
      const { 
@@ -40,6 +47,27 @@ const useStyles = makeStyles({
          setSelectedDate,
          setTimeRange
      } = props;
+     const [isLoading, setIsLoading] = useState(false);
+     const [highlightedDays, setHighlightedDays] = useState([]);
+     
+     const handleMonthChange = (date) => {
+        setIsLoading(true);
+        setHighlightedDays([]);
+        fetchHighlightedDays(date);
+     }
+
+     const fetchHighlightedDays = (date) => {
+        if(timeout){
+           clearTimeout(timeout);
+        }
+        timeout = setTimeout(async () => {
+            let res = await getDays({dateString:dateFormat(date)});
+            setIsLoading(false);
+            if(res.status === 'success'){
+              setHighlightedDays(res.result);
+            }
+        }, 500);
+     };
 
      useEffect(() => {
         var input = document.getElementById("input-address");
@@ -49,6 +77,8 @@ const useStyles = makeStyles({
           setSearchLocation(place.geometry.location.toJSON());
           setAddress(place.formatted_address);
         });
+
+        fetchHighlightedDays(selectedDate);
      }, []);
 
      return (
@@ -90,21 +120,29 @@ const useStyles = makeStyles({
             <Grid container item sm={4} alignItems="center">
                <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DatePicker
-                        //label="Locations Date"
+                        //label="Select Date"
                         value={selectedDate}
-                        onChange={(newValue) => {
-                            var d = newValue.getDate();
-                            var m = newValue.getMonth() + 1; //Month from 0 to 11
-                            var y = newValue.getFullYear();
-                            var dateStr = '' + y + '-' + (m<=9 ? '0' + m : m) + '-' + (d <= 9 ? '0' + d : d);
-                            setSelectedDate(dateStr);
+                        loading={isLoading}
+                        renderLoading={() => <CalendarPickerSkeleton />}
+                        renderInput={(params) => <TextField {...params} />}
+                        renderDay={(day, _value, DayComponentProps) => {
+                            const isSelected =
+                              !DayComponentProps.outsideCurrentMonth &&
+                              highlightedDays.indexOf(day.getDate()) > -1;
+                            return (
+                               <PickersDay 
+                                  key={day.toString()} 
+                                  {...DayComponentProps} 
+                                  //disabled={!isSelected}
+                                  style={{border: isSelected?'1px solid #ff844b':0}}
+                               />
+                            );
+                          }}
+                          onMonthChange={handleMonthChange}
+                          onChange={(newValue) => {
+                            setSelectedDate(newValue);
                             setTimeRange([0,24]);
-                        }}
-                        renderInput={(params) =>
-                          <TextField {...params} 
-                              //fullWidth 
-                          />
-                        }
+                          }}
                     />
                 </LocalizationProvider>
             </Grid>

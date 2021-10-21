@@ -44,9 +44,9 @@ app.post('/api/clusters', async (req, res) => {
 
   const { dateString, timeRange, zoom, bounds } = req.body;
 
-  let d = dateString.split("-");
+  let d = dateString.split("/");
 
-  let t0 = Date.UTC(d[0],parseInt(d[1])-1,d[2])/1000
+  let t0 = Date.UTC(d[2],parseInt(d[0])-1,d[1])/1000
   let t1 = t0 + timeRange[0]*60*60;
   let t2 = t0 + timeRange[1]*60*60;
 
@@ -59,7 +59,7 @@ app.post('/api/clusters', async (req, res) => {
   
   let query = '';
 
-  if(zoom>=15){
+  if(zoom>=16){
     query = `
         SELECT DISTINCT ON (advertiser_id)
             id,
@@ -73,7 +73,7 @@ app.post('/api/clusters', async (req, res) => {
             AND (location_at>=${t1} AND location_at<${t2})
         ORDER BY advertiser_id, location_at DESC
     `;
-  }else if(zoom<15 && zoom>=13){
+  }else if(zoom<16 && zoom>=14){
     query = `
       SELECT
         MIN(id) AS id,
@@ -130,9 +130,9 @@ app.post('/api/clusters', async (req, res) => {
 app.post('/api/counts', async (req, res) => {
   const { dateString, timeRange, bounds } = req.body;
 
-  let d = dateString.split("-");
+  let d = dateString.split("/");
 
-  let t0 = Date.UTC(d[0],parseInt(d[1])-1,d[2])/1000
+  let t0 = Date.UTC(d[2],parseInt(d[0])-1,d[1])/1000
   let t1 = t0 + timeRange[0]*60*60;
   let t2 = t0 + timeRange[1]*60*60;
 
@@ -189,8 +189,40 @@ app.post('/api/marker/info', async (req, res) => {
   }
 });
 
-function getTableName(dateString){
-  return 'locations_' + dateString.split("-").join("_");
+app.post('/api/days', async (req, res) => {
+  const { dateString } = req.body;
+  var dateArray = dateString.split('/');
+  var query = `
+     SELECT 
+       tablename 
+     FROM
+       pg_catalog.pg_tables
+     WHERE 
+       schemaname='public'
+       AND tablename like 'locations_${dateArray[2]}_${dateArray[0]}_%'
+  `;
+  try {
+      const result = await dbClient.query(query);
+      const tables = result.rows;
+      const days = tables.map(row=>parseInt(row.tablename.split("_")[3]));
+      res.json({
+        'status': 'success',
+        'result': days
+      });
+  } catch (err) {
+      res.json({
+        'status': 'failed',
+        'message': err
+      });
+  }
+});
+
+function getTableName(dateStr){
+   var dateArray = dateStr.split("/");
+   var y = dateArray[2];
+   var m = dateArray[0];
+   var d = dateArray[1];
+   return `locations_${y}_${m}_${d}`;
 }
 
 function normalizePort(val) {

@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { makeStyles } from '@mui/styles';
 import LinearProgress from '@mui/material/LinearProgress';
 
-
 import ReactMapGL, { 
            Source,
            Layer,
@@ -20,6 +19,7 @@ import mapboxgl from "mapbox-gl";
 import numeral from "numeral";
 
 import { MAPBOX_ACCESS_TOKEN, DEFAULT_VIEWPORT } from "../../utils/settings.js";
+import { dateFormat } from "../../utils/util.js";
 import { getClusters } from "../../services/cluster.js";
 import { getCounts } from "../../services/counts.js";
 
@@ -73,7 +73,7 @@ function Map(props) {
     });
     const [showLoading, setShowLoading] = useState(true);
     
-    const [markerInfo, setMarkerInfo] = useState(false);
+    const [markerPanelInfo, setMarkerPanelInfo] = useState(false);
 
     const handleClick = async (e) => {
         if(e.features && e.features.length>0){
@@ -87,22 +87,13 @@ function Map(props) {
                     transitionDuration: 500
                 });
             }else if(feature.layer.id === 'unclustered-point-layer'){
-                setMarkerInfo({
-                    ...markerInfo,
-                    open:true,
-                    id:feature.properties["id"]
+                setMarkerPanelInfo({
+                    ...markerPanelInfo,
+                    open: true,
+                    date: dateFormat(selectedDate),
+                    id: feature.properties["id"]
                 });
-                /*
-                let res = await getMarkerInfo({
-                    dateString:selectedDate.toString(),
-                    id:feature.properties["id"]
-                });
-                if(res.status === 'success'){
-                    setMarkerInfo(res.result);
-                }else{
-                    setMarkerInfo(null);
-                }
-                */
+               
             }
         }
     }
@@ -125,7 +116,7 @@ function Map(props) {
                ...viewport,
                latitude: searchLocation.lat,
                longitude: searchLocation.lng,
-               zoom: 15,
+               zoom: 16,
                //transitionDuration: 4000,
                //transitionInterpolator: new FlyToInterpolator(),
                ////transitionEasing: d3.easeCubic
@@ -145,7 +136,7 @@ function Map(props) {
 
     const mapDataCallback = () => {
         const map = mapRef.current.getMap();
-        if(map.getZoom()<13){
+        if(map.getZoom()<14){
             setClusterSource({
                 type: 'FeatureCollection',
                 features:[]
@@ -158,7 +149,7 @@ function Map(props) {
         timeout = setTimeout(async () => {
            setShowLoading(true);
            let res = await getClusters({
-               dateString:selectedDate,
+               dateString: dateFormat(selectedDate),
                timeRange: timeRange,
                zoom: map.getZoom(),
                bounds: map.getBounds().toArray().flat()
@@ -182,7 +173,7 @@ function Map(props) {
                 });
            }
            res = await getCounts({
-                dateString:selectedDate,
+                dateString: dateFormat(selectedDate),
                 timeRange: timeRange,
                 bounds: map.getBounds().toArray().flat()
            });
@@ -210,7 +201,7 @@ function Map(props) {
             ref={mapRef}
             attributionControl={false}
             maxZoom={24}
-            minZoom={13}
+            minZoom={14}
             onViewportChange={setViewport}
             interactiveLayerIds={['cluster-layer','unclustered-point-layer']}
             onClick={handleClick}
@@ -229,8 +220,8 @@ function Map(props) {
                     source='clusterSource'
                     filter={['>', 'point_count', 1]}
                     paint={{
-                    'circle-color': ['step', ['get', 'point_count'], '#51bbd6', 100, '#f1f075', 750, '#f28cb1'],
-                    'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40]
+                      'circle-color': ['step', ['get', 'point_count'], '#51bbd6', 100, '#f1f075', 750, '#f28cb1'],
+                      'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40]
                     }}
                 />
                 <Layer 
@@ -259,7 +250,20 @@ function Map(props) {
                         'icon-pitch-alignment':'viewport'
                     }}
                 />
-                
+                {markerPanelInfo.open && (
+                   <Layer
+                        id='select-point-layer'
+                        type='circle'
+                        source='clusterSource'
+                        filter={['==', 'id', markerPanelInfo.id]}
+                        paint={{
+                            'circle-radius':20,
+                            'circle-color': 'transparent',
+                            'circle-stroke-color':'#ff844b',
+                            'circle-stroke-width':2
+                        }}
+                    />
+                )}
             </Source>
             <NavigationControl style={{ top:10,right:10}}/>
             <ScaleControl style={{bottom:10,left:10}} />
@@ -273,13 +277,12 @@ function Map(props) {
                 </Marker>
                 </>
             )}
-            {
-                markerInfo.open && (
-                  <MarkerPanel
-                    markerInfo={markerInfo}    
-                    setMarkerInfo={setMarkerInfo}
-                  />)
-            }
+            {markerPanelInfo.open && (
+                <MarkerPanel
+                    markerPanelInfo={markerPanelInfo}    
+                    setMarkerPanelInfo={setMarkerPanelInfo}
+                />
+            )}
             {showLoading && <LinearProgress />}
         </ReactMapGL>
     );
