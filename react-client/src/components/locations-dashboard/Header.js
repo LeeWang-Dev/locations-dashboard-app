@@ -44,8 +44,7 @@ const useStyles = makeStyles({
          address,
          setAddress,
          selectedDate,
-         setSelectedDate,
-         setTimeRange
+         setSelectedDate
      } = props;
      const [isLoading, setIsLoading] = useState(false);
      const [highlightedDays, setHighlightedDays] = useState([]);
@@ -142,10 +141,6 @@ const useStyles = makeStyles({
                           onYearChange={handleMonthChange}
                           onChange={(newValue) => {
                             setSelectedDate(newValue);
-                            setTimeRange([
-                                secondsFromDate(dateFormat(newValue)),
-                                secondsFromDate(dateFormat(newValue))+86399
-                            ]);
                           }}
                     />
                 </LocalizationProvider>

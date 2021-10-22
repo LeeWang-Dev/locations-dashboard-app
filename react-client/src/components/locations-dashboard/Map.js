@@ -66,7 +66,7 @@ function Map(props) {
 
     const mapRef = useRef(null);
     const [viewport, setViewport] = useState(DEFAULT_VIEWPORT);
-
+    const [interactiveLayerIds, setInteractiveLayerIds] = useState([]);
     const [clusterSource, setClusterSource] = useState({
         type: 'FeatureCollection',
         features:[]
@@ -173,6 +173,8 @@ function Map(props) {
                     features:[]
                 });
            }
+           setInteractiveLayerIds(['cluster-layer','unclustered-point-layer']);
+
            res = await getCounts({
                 date: dateFormat(selectedDate),
                 timeRange: timeRange,
@@ -204,7 +206,7 @@ function Map(props) {
             maxZoom={24}
             minZoom={14}
             onViewportChange={setViewport}
-            interactiveLayerIds={['cluster-layer','unclustered-point-layer']}
+            interactiveLayerIds={interactiveLayerIds}
             onClick={handleClick}
         >
             <Source

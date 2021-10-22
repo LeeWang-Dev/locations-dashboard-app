@@ -54,7 +54,6 @@ function Main() {
               setAddress={setAddress}
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
-              setTimeRange={setTimeRange}
            />
            <div className={classes.content}>
               <div className={classes.chartContainer}>

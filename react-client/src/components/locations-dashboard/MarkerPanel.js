@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import { makeStyles } from '@mui/styles';
 import Grid from '@mui/material/Grid';
@@ -27,7 +27,6 @@ import { timeFormat, secondsFromDate } from "../../utils/util.js";
 import { getMarkerInfo, getTracking } from "../../services/marker.js";
 
 mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
-
 
 const useStyles = makeStyles({
     drawer:{
@@ -104,7 +103,21 @@ function MarkerPanel(props) {
 
     const [toggleValue, setToggleValue] = useState('properties');
     const [markerInfo, setMarkerInfo] = useState(null);
-    const [trackSource, setTrackSource] = useState(null);
+    const [sliderProps, setSliderProps] = useState({
+        min:0,
+        max:100,
+        step: 1,
+        defaultValue:0,
+        marks:[]
+    });
+    const [sliderValue, setSliderValue] = useState(0);
+    const [sliderLabel, setSliderLabel] = useState('');
+    const [trackData, setTrackData] = useState(null);
+    const [trackSource, setTrackSource] = useState({
+        type: 'FeatureCollection',
+        features:[]
+    });
+
     //const [interpolateLine, setInterpolateSource] = useState(null);
 
     const [viewport, setViewport] = useState({
@@ -113,8 +126,6 @@ function MarkerPanel(props) {
         zoom:15
     });
     
-    const [sliderValue, setSliderValue] = useState(86400);
-
     const toggleDrawer = (open) => (event) => {
         if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
             return;
@@ -133,13 +144,58 @@ function MarkerPanel(props) {
     
     const handleSliderChange = (event, newValue) => {
         setSliderValue(newValue);
+        setSliderLabel(`UTC ${timeFormat(newValue-secondsFromDate(markerPanelInfo.date))} ${markerPanelInfo.date}`);
     };
 
    useEffect(()=>{
-      
+     
+    
       fetchMarkerInfo();
         
-   }, [markerPanelInfo]);
+   }, []);
+
+   useEffect(()=>{
+       if(toggleValue==='tracking'){
+          const t0 = secondsFromDate(markerPanelInfo.date);
+          setSliderProps({
+            min: t0,
+            max: t0+86399,
+            defaultValue:t0+86399,
+            step: 10,
+            marks:[
+                { value: t0, label: '0'},
+                { value: t0+3*3600, label: '3'},
+                { value: t0+6*3600, label: '6'},
+                { value: t0+9*3600, label: '9'},
+                { value: t0+12*3600, label: '12'},
+                { value: t0+15*3600, label: '15'},
+                { value: t0+18*3600, label: '18'},
+                { value: t0+21*3600, label: '21'},
+                { value: t0+24*3600, label: '24'}
+            ]
+          });
+          if(markerInfo){
+            setSliderValue(parseInt(markerInfo.location_at));
+            setSliderLabel(`UTC ${timeFormat(parseInt(markerInfo.location_at)-t0)} ${markerPanelInfo.date}`);
+          }else{
+            setSliderValue(t0+86399);
+            setSliderLabel(`UTC ${timeFormat(86399)} ${markerPanelInfo.date}`);
+          }
+          /*
+          res = await getTracking({
+                date: markerPanelInfo.date,
+                id: markerPanelInfo.id
+            });
+            //console.log(res);
+            if(res.status === 'success'){
+            //setTrackSource(res.result);
+
+            }else{
+            //setTrackSource(null);
+            }
+            */
+       }
+   }, [toggleValue])
 
    const fetchMarkerInfo = async () => {
         let res = await getMarkerInfo({
@@ -148,21 +204,10 @@ function MarkerPanel(props) {
         });
         if(res.status === 'success'){
             setMarkerInfo(res.result);
-            setSliderValue(parseInt(res.result.location_at));
+            
             //res.result.location_at
         }else{
             setMarkerInfo(null);
-        }
-        res = await getTracking({
-            date: markerPanelInfo.date,
-            id: markerPanelInfo.id
-        });
-        //console.log(res);
-        if(res.status === 'success'){
-           //setTrackSource(res.result);
-
-        }else{
-           //setTrackSource(null);
         }
    }
 
@@ -385,30 +430,15 @@ function MarkerPanel(props) {
                     <Grid container className={classes.timeslider} justifyContent="center">
                         <Paper>
                             <Typography variant="h6" align="center">
-                                {`UTC ${timeFormat(sliderValue-secondsFromDate(markerPanelInfo.date))} ${markerPanelInfo.date}`}
+                                {sliderLabel}
                             </Typography>
                             <Slider
                                 aria-label="track time"
                                 value={sliderValue}
                                 onChange={handleSliderChange}
-                                defaultValue={86399}
-                                min={secondsFromDate(markerPanelInfo.date)}
-                                max={secondsFromDate(markerPanelInfo.date)+86399}
-                                setp={10}
                                 //valueLabelDisplay="auto"
                                 style={{color:'#ff844b'}}
-                                marks = {[
-                                    { value: secondsFromDate(markerPanelInfo.date), label: '0'},
-                                    { value: secondsFromDate(markerPanelInfo.date)+3*3600, label: '3'},
-                                    { value: secondsFromDate(markerPanelInfo.date)+6*3600, label: '6'},
-                                    { value: secondsFromDate(markerPanelInfo.date)+9*3600, label: '9'},
-                                    { value: secondsFromDate(markerPanelInfo.date)+12*3600, label: '12'},
-                                    { value: secondsFromDate(markerPanelInfo.date)+15*3600, label: '15'},
-                                    { value: secondsFromDate(markerPanelInfo.date)+18*3600, label: '18'},
-                                    { value: secondsFromDate(markerPanelInfo.date)+21*3600, label: '21'},
-                                    { value: secondsFromDate(markerPanelInfo.date)+24*3600, label: '24'}
-                                ]}
-                                
+                                {...sliderProps}
                             />
                         </Paper>
                     </Grid>
