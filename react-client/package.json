@@ -19,6 +19,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+    "@turf/turf": "^6.5.0",
     "axios": "^0.22.0",
     "date-fns": "^2.25.0",
     "numeral": "^2.0.6",

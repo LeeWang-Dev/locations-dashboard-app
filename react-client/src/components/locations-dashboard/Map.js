@@ -26,7 +26,7 @@ import { getCounts } from "../../services/counts.js";
 import iconMarker from "../../assets/images/marker-icon.png";
 import iconSearch from "../../assets/images/search-marker.png";
 
-import MarkerPanel from "./MarkerPanel.js";
+import MarkerPanel from "./MarkerPanel/MarkerPanel.js";
 
 mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
 
@@ -66,7 +66,7 @@ function Map(props) {
 
     const mapRef = useRef(null);
     const [viewport, setViewport] = useState(DEFAULT_VIEWPORT);
-    const [interactiveLayerIds, setInteractiveLayerIds] = useState([]);
+    const [interactiveLayerIds, setInteractiveLayerIds] = useState(null);
     const [clusterSource, setClusterSource] = useState({
         type: 'FeatureCollection',
         features:[]

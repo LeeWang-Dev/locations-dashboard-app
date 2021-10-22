@@ -188,7 +188,8 @@ app.post('/api/marker/tracking', async (req, res) => {
   const tableName = getTableName(date);
   var query = `
      SELECT 
-      id, latitude, longitude,
+      id, location_at,
+      latitude, longitude, geom,
       altitude, heading,
       speed, horizontal_accuracy, vertical_accuracy
      FROM
@@ -197,13 +198,28 @@ app.post('/api/marker/tracking', async (req, res) => {
       advertiser_id=(
         SELECT advertiser_id FROM ${tableName} WHERE id=${id}
       )
-     ORDER BY location_at DESC 
+     ORDER BY location_at
   `;
+
+  const geojsonQuery = `
+      SELECT jsonb_build_object(
+        'type', 'FeatureCollection',
+        'features', jsonb_agg(features.feature)
+      ) AS geojson
+      FROM (
+        SELECT jsonb_build_object(
+        'type',       'Feature',
+        'geometry',   ST_AsGeoJSON(geom)::jsonb,
+        'properties', to_jsonb(inputs) - 'geom'
+        ) AS feature
+        FROM (${query}) inputs) features;
+    `;
+
   try {
-      const result = await dbClient.query(query);
+      const result = await dbClient.query(geojsonQuery);
       res.json({
         'status': 'success',
-        'result': result.rows
+        'result': result.rows[0].geojson
       });
   } catch (err) {
       res.json({
