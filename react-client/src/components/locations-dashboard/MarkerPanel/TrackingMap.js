@@ -213,12 +213,12 @@ function TrackingMap(props){
             for(let i=0;i<features.length-1;i++){
                 var t1 = parseInt(features[i].properties['location_at']);
                 var t2 = parseInt(features[i+1].properties['location_at']);
-                var dm=(t2-t1)/10;
+                var dm=(t2-t1)/30;
                 var bearing = turf.bearing(features[i], features[i+1]);
                 if(dm>1){
                     var k=0;
                     while(t1<t2){
-                        t1+=10;
+                        t1+=30;
                         k++;
                         var from_lat=parseFloat(features[i].properties['latitude']);
                         var from_lng=parseFloat(features[i].properties['longitude']);
@@ -278,7 +278,7 @@ function TrackingMap(props){
         min: t0,
         max: t0+86399,
         defaultValue:t0+86399,
-        step: 10,
+        step: 30,
         marks:[
             { value: t0, label: '0'},
             { value: t0+3*3600, label: '3'},
@@ -320,7 +320,7 @@ function TrackingMap(props){
                         paint={{
                             'line-color': 'cyan',
                             'line-opacity': 0.75,
-                            'line-width': 2
+                            'line-width': 4
                         }}
                     />
                 </Source>   

@@ -57,6 +57,7 @@ function TimeSlider(props){
         setSliderProps({
             min:t0,
             max:t0+86399,
+            step:30,
             defaultValue: [t0,t0+86399],
             marks:[
                 { value: t0, label: '0'},
