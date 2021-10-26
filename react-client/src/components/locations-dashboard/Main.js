@@ -58,7 +58,7 @@ function Main() {
            <div className={classes.content}>
               <div className={classes.chartContainer}>
                 <Counts counts={counts} />
-                <Charts />  
+                <Charts counts={counts} />  
               </div>
               <div className={classes.mapContainer}>
                  <Map 

@@ -218,8 +218,6 @@ function TrackingMap(props){
                 if(dm>1){
                     var k=0;
                     while(t1<t2){
-                        t1+=30;
-                        k++;
                         var from_lat=parseFloat(features[i].properties['latitude']);
                         var from_lng=parseFloat(features[i].properties['longitude']);
                         var to_lat=parseFloat(features[i+1].properties['latitude']);
@@ -232,10 +230,19 @@ function TrackingMap(props){
                            time: t1,
                            heading: turf.bearingToAzimuth(bearing),
                         });
-                     }
+                        t1+=30;
+                        k++;
+                    }
+                }else{
+                    newTrackPoints.push({
+                        latitude: parseFloat(features[i].properties['latitude']),
+                        longitude: parseFloat(features[i].properties['longitude']),
+                        time: t1,
+                        heading: turf.bearingToAzimuth(bearing),
+                    });
                 }
             }
-            
+
             setTrackPoints(newTrackPoints);
 
             // current track line
