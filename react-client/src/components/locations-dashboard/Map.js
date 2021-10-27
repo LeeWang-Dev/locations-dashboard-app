@@ -199,8 +199,8 @@ function Map(props) {
             {...viewport}    
             width="100%"
             height="100%"
-            mapStyle="mapbox://styles/mapbox/light-v10"
-            //mapStyle="mapbox://styles/mapbox/streets-v11"
+            //mapStyle="mapbox://styles/mapbox/light-v10"
+            mapStyle="mapbox://styles/mapbox/streets-v11"
             //mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
             mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
             ref={mapRef}

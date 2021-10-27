@@ -184,7 +184,7 @@ function TrackingMap(props){
                 ...viewport,
                 longitude: longitude,
                 latitude: latitude,
-                zoom: zoom,
+                zoom: zoom-1,
             });
 
             // measured points

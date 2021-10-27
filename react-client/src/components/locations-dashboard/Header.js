@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import Badge from '@mui/material/Badge';
+import MenuItem from '@mui/material/MenuItem';
 
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
@@ -19,7 +19,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import imgLogo from "../../assets/images/logo.png";
 
 import { google } from "./../../utils/settings.js";
-import { dateFormat, secondsFromDate } from '../../utils/util.js';
+import { dateFormat } from '../../utils/util.js';
 import { getDays } from "../../services/days.js";
 
 const useStyles = makeStyles({
@@ -116,14 +116,14 @@ const useStyles = makeStyles({
                   autoComplete="off"
                 />
             </Grid>
-            <Grid container item sm={4} alignItems="center">
+            <Grid container item sm={2} alignItems="center">
                <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DatePicker
                         //label="Select Date"
                         value={selectedDate}
                         loading={isLoading}
                         renderLoading={() => <CalendarPickerSkeleton />}
-                        renderInput={(params) => <TextField {...params} />}
+                        renderInput={(params) => <TextField {...params} fullWidth />}
                         renderDay={(day, _value, DayComponentProps) => {
                             const isSelected =
                               !DayComponentProps.outsideCurrentMonth &&
@@ -144,6 +144,36 @@ const useStyles = makeStyles({
                           }}
                     />
                 </LocalizationProvider>
+            </Grid>
+            <Grid container item sm={2} alignItems="center">
+              <TextField
+                //className={classes.textBox}
+                variant="outlined"
+                //label="Select categories"
+                placeholder="Select Category"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                select={true}
+                SelectProps={{
+                    MenuProps: {
+                      anchorOrigin: { vertical: "bottom", horizontal: "center" },
+                      transformOrigin: { vertical: "top", horizontal: "center" },
+                      getContentAnchorEl: null
+                  }
+                }}
+                //value={projectType}
+                //onChange={(e) => setCategory(e.target.value)}
+              >
+                  <MenuItem value="all">
+                     All
+                  </MenuItem>
+                  <MenuItem value="restaurant">
+                     Restaurant 
+                  </MenuItem>
+                  <MenuItem value="bank">
+                     Bank
+                  </MenuItem>
+              </TextField>
             </Grid>
         </Grid>
      );
