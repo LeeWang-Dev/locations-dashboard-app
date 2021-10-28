@@ -42,7 +42,7 @@ app.listen(PORT, () => {
 
 app.post('/api/clusters', async (req, res) => {
 
-  const { date, timeRange, zoom, bounds } = req.body;
+  const { date, timeRange, zoom, bounds, poiLocations, poiRadius } = req.body;
 
   let t1 = timeRange[0];
   let t2 = timeRange[1];
@@ -56,6 +56,12 @@ app.post('/api/clusters', async (req, res) => {
   
   let query = '';
 
+  let categoryCondition = '';
+  if(poiLocations.length>0){
+    let poiGeoJSON = JSON.stringify({"type":"MultiPoint","coordinates":poiLocations});
+    categoryCondition = `AND ST_DWithin(geom::geography, ST_SetSRID(ST_GeomFromGeoJSON('${poiGeoJSON}'),4326)::geography, ${poiRadius})`;
+  }
+
   if(zoom>=16){
     query = `
         SELECT DISTINCT ON (advertiser_id)
@@ -67,6 +73,7 @@ app.post('/api/clusters', async (req, res) => {
             ${tableName}
         WHERE
             geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
+            ${categoryCondition}
             AND (location_at>=${t1} AND location_at<${t2})
         ORDER BY advertiser_id, location_at DESC
     `;
@@ -83,15 +90,57 @@ app.post('/api/clusters', async (req, res) => {
             ST_ClusterDBSCAN(geom,${2*Math.PI/(Math.pow(2,zoom-1))},1) OVER () cluster_id,
             heading,
             geom
-        FROM
+         FROM
             ${tableName}
-        WHERE
+         WHERE
             geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
+            ${categoryCondition}
             AND (location_at>=${t1} AND location_at<${t2})
-        ORDER BY advertiser_id, location_at DESC
-        )  cluster_table
+         ORDER BY advertiser_id, location_at DESC
+        ) AS cluster_table
       GROUP BY cluster_id
     `;
+  }else if(zoom<14 && zoom>=12){
+    query = `
+      SELECT
+        MIN(id) AS id,
+        MIN(heading) AS heading,
+        COUNT(cluster_id) AS point_count,
+        ST_CENTROID(ST_UNION(geom)) AS geom
+      FROM
+        (SELECT DISTINCT ON (advertiser_id)
+            id,
+            ST_ClusterKMeans(geom, 12) OVER() AS cluster_id,
+            heading,
+            geom
+         FROM
+            ${tableName}
+         WHERE
+            geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
+            ${categoryCondition}
+            AND (location_at>=${t1} AND location_at<${t2})
+         ORDER BY advertiser_id, location_at DESC
+        ) AS cluster_table
+      GROUP BY cluster_id
+    `;
+    /*
+    query = `
+      SELECT
+        count(*) AS point_count,
+        ST_Centroid(ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)) AS geom
+      FROM
+      ( SELECT
+          advertiser_id          
+        FROM
+          ${tableName}
+        WHERE
+          geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
+          ${categoryCondition}
+          AND (location_at>=${t1} AND location_at<${t2})
+        GROUP BY advertiser_id
+      ) AS group_table
+    `;
+    */
   }
   
    // get geojson query
@@ -125,7 +174,7 @@ app.post('/api/clusters', async (req, res) => {
 });
 
 app.post('/api/counts', async (req, res) => {
-  const { date, timeRange, bounds } = req.body;
+  const { date, timeRange, bounds, poiLocations, poiRadius } = req.body;
 
   let t1 = timeRange[0];
   let t2 = timeRange[1];
@@ -137,16 +186,31 @@ app.post('/api/counts', async (req, res) => {
   let x2 = bounds[2];
   let y2 = bounds[3];
   
-  let query = `
-     SELECT 
-        platform,
-        count(platform) AS count
-     FROM
-       ${tableName}
-     WHERE
-        geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
-        AND (location_at>=${t1} AND location_at<${t2})
-     GROUP BY platform   
+  let query = '';
+  let categoryCondition = '';
+  if(poiLocations.length>0){
+    let poiGeoJSON = JSON.stringify({"type":"MultiPoint","coordinates":poiLocations});
+    categoryCondition = `AND ST_DWithin(geom::geography, ST_SetSRID(ST_GeomFromGeoJSON('${poiGeoJSON}'),4326)::geography, ${poiRadius})`;
+  }
+
+  query = `
+    SELECT
+      platform,
+      count(platform) AS count
+    FROM
+      (
+        SELECT 
+          advertiser_id,
+          MIN(platform) AS platform
+        FROM
+          ${tableName}
+        WHERE
+          geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
+          ${categoryCondition}
+          AND (location_at>=${t1} AND location_at<${t2})
+        GROUP BY advertiser_id 
+      ) AS group_table 
+    GROUP BY platform
   `;
 
   try {

@@ -68,7 +68,7 @@ function Charts(props) {
                 </ToggleButton>
             </ToggleButtonGroup>
        </Grid>
-       <Grid container justifyContent="center" style={{width:'100%',height:500, padding:20}}>
+       <Grid container justifyContent="center" style={{width:'100%',height:500}}>
           <Paper className={classes.paper}>
             <Typography variant="h6" className={classes.paperHeader}>
                Device Platform

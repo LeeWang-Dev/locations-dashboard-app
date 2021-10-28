@@ -16,10 +16,11 @@ let theme = createTheme({
     MuiTextField:{
       styleOverrides: {
         root: {
-          paddingLeft:20,
-          paddingRight:20,
+          paddingLeft:10,
+          paddingRight:10,
           borderRadius:72,
-          backgroundColor:'#f1f6fa'
+          backgroundColor:'#f1f6fa',
+          boxSizing:'border-box'
         },
       },
     },

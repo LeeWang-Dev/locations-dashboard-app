@@ -59,8 +59,7 @@ function Map(props) {
     const { 
        searchLocation,
        address,
-       selectedDate,
-       timeRange,
+       filter,
        setCounts
     } = props;
 
@@ -90,7 +89,7 @@ function Map(props) {
                 setMarkerPanelInfo({
                     ...markerPanelInfo,
                     open: true,
-                    date: dateFormat(selectedDate),
+                    date: dateFormat(filter.date),
                     id: feature.properties["id"],
                     geometry: feature.geometry
                 });
@@ -108,6 +107,12 @@ function Map(props) {
             // Add the image to the map style.
             map.addImage('marker-icon', image);
         });
+        
+        return () => {
+            if(map.hasImage('marker-icon')){
+                map.removeImage('marker-icon');
+            }
+        }
 
     }, []);
 
@@ -117,7 +122,7 @@ function Map(props) {
                ...viewport,
                latitude: searchLocation.lat,
                longitude: searchLocation.lng,
-               zoom: 16,
+               zoom: 14,
                //transitionDuration: 4000,
                //transitionInterpolator: new FlyToInterpolator(),
                ////transitionEasing: d3.easeCubic
@@ -133,15 +138,18 @@ function Map(props) {
 
        mapDataCallback();
 
-    }, [selectedDate, timeRange]);
+       return () => map.off('moveend', mapDataCallback);
+
+    }, [filter]);
 
     const mapDataCallback = () => {
         const map = mapRef.current.getMap();
-        if(map.getZoom()<14){
+        if(map.getZoom()<12){
             setClusterSource({
                 type: 'FeatureCollection',
                 features:[]
             });
+            setCounts([]);
             return;
         } 
         if(timeout){
@@ -149,11 +157,30 @@ function Map(props) {
         }
         timeout = setTimeout(async () => {
            setShowLoading(true);
+           let poiLocations = [];
+           if(filter.category !== 'All Categories'){
+                const poiFeatures = map.queryRenderedFeatures({ layers: ['poi-label'] });
+                let categoryFeatures = poiFeatures.filter(feature=>feature.properties["category_en"]===filter.category);
+                categoryFeatures.forEach(feature=>{
+                   poiLocations.push(feature.geometry.coordinates);
+                });
+                if(poiLocations.length === 0){
+                    setClusterSource({
+                        type: 'FeatureCollection',
+                        features:[]
+                    });
+                    setCounts([]);
+                    setShowLoading(false);
+                    return;
+                }
+           }
            let res = await getClusters({
-               date: dateFormat(selectedDate),
-               timeRange: timeRange,
+               date: dateFormat(filter.date),
+               timeRange: filter.timeRange,
                zoom: map.getZoom(),
-               bounds: map.getBounds().toArray().flat()
+               bounds: map.getBounds().toArray().flat(),
+               poiLocations: poiLocations,
+               poiRadius: filter.category_distance
            });
            setShowLoading(false);
            if(res.status === 'success'){
@@ -166,6 +193,11 @@ function Map(props) {
                         feature.properties["point_count_abbreviated"] = abbr;
                     });
                     setClusterSource(res.result);
+               }else{
+                    setClusterSource({
+                        type: 'FeatureCollection',
+                        features:[]
+                    });
                }
            }else{
                 setClusterSource({
@@ -176,9 +208,11 @@ function Map(props) {
            setInteractiveLayerIds(['cluster-layer','unclustered-point-layer']);
 
            res = await getCounts({
-                date: dateFormat(selectedDate),
-                timeRange: timeRange,
-                bounds: map.getBounds().toArray().flat()
+                date: dateFormat(filter.date),
+                timeRange: filter.timeRange,
+                bounds: map.getBounds().toArray().flat(),
+                poiLocations: poiLocations,
+                poiRadius: filter.category_distance
            });
            if(res.status === 'success'){
               var newCounts = [];
@@ -206,7 +240,7 @@ function Map(props) {
             ref={mapRef}
             attributionControl={false}
             maxZoom={24}
-            minZoom={14}
+            minZoom={12}
             onViewportChange={setViewport}
             interactiveLayerIds={interactiveLayerIds}
             onClick={handleClick}

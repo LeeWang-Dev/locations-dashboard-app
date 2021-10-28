@@ -32,9 +32,8 @@ const useStyles = makeStyles({
 function TimeSlider(props){
     const classes = useStyles();
     const { 
-        selectedDate,
-        timeRange,
-        setTimeRange
+        filter,
+        setFilter
     } = props;
     
     const [sliderProps, setSliderProps] = useState({
@@ -47,13 +46,16 @@ function TimeSlider(props){
     const [timeRangeLabel, setTimeRangeLabel] = useState('');
 
     const handleChange = (event, newValue) => {
-        setTimeRange(newValue);
-        const t0 = secondsFromDate(dateFormat(selectedDate));
-        setTimeRangeLabel(`UTC ${timeFormat(newValue[0]-t0)} - ${timeFormat(newValue[1]-t0)} ${dateFormat(selectedDate)}`);
+        setFilter({
+           ...filter,
+           timeRange: newValue
+        });
+        const t0 = secondsFromDate(dateFormat(filter.date));
+        setTimeRangeLabel(`UTC ${timeFormat(newValue[0]-t0)} - ${timeFormat(newValue[1]-t0)} ${dateFormat(filter.date)}`);
     };
 
     useEffect(()=>{
-        const t0 = secondsFromDate(dateFormat(selectedDate));
+        const t0 = secondsFromDate(dateFormat(filter.date));
         setSliderProps({
             min:t0,
             max:t0+86399,
@@ -72,11 +74,13 @@ function TimeSlider(props){
             ]
         });    
 
-        setTimeRange([t0, t0+86399]);
+        setFilter({
+            ...filter,
+            timeRange: [t0, t0+86399]
+        });
+        setTimeRangeLabel(`UTC ${timeFormat(0)} - ${timeFormat(86399)} ${dateFormat(filter.date)}`);
 
-        setTimeRangeLabel(`UTC ${timeFormat(0)} - ${timeFormat(86399)} ${dateFormat(selectedDate)}`);
-
-     }, [selectedDate]);
+     }, [filter.date]);
 
     return (
         <Grid container className={classes.timeslider} justifyContent="center">
@@ -86,7 +90,7 @@ function TimeSlider(props){
                </Typography>
                <Slider
                     getAriaLabel={() => 'Time range'}
-                    value={timeRange}
+                    value={filter.timeRange}
                     onChange={handleChange}
                     //valueLabelDisplay="auto"
                     //color="primary"

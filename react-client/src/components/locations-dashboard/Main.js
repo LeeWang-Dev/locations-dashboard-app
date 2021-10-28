@@ -25,7 +25,7 @@ const useStyles = makeStyles({
       backgroundColor:'#f1f6fa'
    },
    chartContainer:{
-     width:540,
+     width:500,
      padding:20
    },
    mapContainer:{
@@ -36,14 +36,17 @@ const useStyles = makeStyles({
 
 function Main() {
     const classes = useStyles();
-    
     const [searchLocation, setSearchLocation] = useState(null);
     const [address, setAddress] = useState(null);
-    const [selectedDate, setSelectedDate] = useState(DEFAULT_DATE);
-    const [timeRange, setTimeRange] = useState([
-       secondsFromDate(dateFormat(DEFAULT_DATE)),
-       secondsFromDate(dateFormat(DEFAULT_DATE))+86399
-    ]);
+    const [filter, setFilter] = useState({
+       date: DEFAULT_DATE,
+       timeRange: [
+         secondsFromDate(dateFormat(DEFAULT_DATE)),
+         secondsFromDate(dateFormat(DEFAULT_DATE))+86399
+      ],
+      category: "All Categories",
+      category_distance: 20
+    });
     const [counts, setCounts] = useState([]);
 
     return (
@@ -52,8 +55,8 @@ function Main() {
               setSearchLocation={setSearchLocation}
               address={address}
               setAddress={setAddress}
-              selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
+              filter={filter}
+              setFilter={setFilter}
            />
            <div className={classes.content}>
               <div className={classes.chartContainer}>
@@ -64,14 +67,12 @@ function Main() {
                  <Map 
                     searchLocation={searchLocation}
                     address={address}
-                    selectedDate={selectedDate}
-                    timeRange={timeRange}
+                    filter={filter}
                     setCounts={setCounts}
                  />
                  <TimeSlider 
-                    selectedDate={selectedDate}
-                    timeRange={timeRange}
-                    setTimeRange={setTimeRange}
+                    filter={filter}
+                    setFilter={setFilter}
                  />
                </div>
            </div>

@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 
-import ShareLocationIcon from '@mui/icons-material/ShareLocation';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 
@@ -17,7 +17,7 @@ function Counts(props) {
            <Grid item sm={4} xs={12}>
                <Paper>
                     <Grid container alignItems="center">
-                        <ShareLocationIcon color="primary" />
+                        <LocationOnIcon color="primary" />
                         <Typography variant="caption">
                             Total Devices
                         </Typography>

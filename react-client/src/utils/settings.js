@@ -14,3 +14,21 @@ export const DEFAULT_VIEWPORT = {
 export const google = window.google;
 
 export const DEFAULT_DATE = new Date('2021-08-01');
+
+// mapbox gl poi-label layer category_en
+export const categories = [
+    'All Categories',
+    'Bank',
+    'Bar',
+    'Cafe',
+    'Gas Station',
+    'Hospital Grounds',
+    'Hotel',
+    'Mall',
+    'Marketplace',
+    'Restaurant',
+    'Shop',
+    'Supermarket',
+];
+
+export const category_distances = [5, 10, 20, 50, 100, 200, 500];
