@@ -1,3 +1,4 @@
+// aws rds db info
 hosting:lee-instance.ciuz5stfwmcj.us-east-1.rds.amazonaws.com
 port:5432
 db:locations_db
@@ -7,6 +8,8 @@ password:testing1234
 CREATE EXTENSION postgis;
 
 CREATE EXTENSION aws_s3 CASCADE;
+
+// create table with a date
 
 CREATE TABLE public.locations_2021_08_01
 (
@@ -38,6 +41,12 @@ CREATE TABLE public.locations_2021_08_01
     dwell_time character varying(20) COLLATE pg_catalog."default",
     CONSTRAINT "locations_2021_08_01_pkey" PRIMARY KEY (id)
 )
+
+// download csv data from s3-bucket
+// split csv files with 1M rows from a large csv file
+// check csv records for validated fields
+// upload csv files on s3-bucket
+// import csv data to db from s3-bucket
 
 SELECT aws_s3.table_import_from_s3 (
   'public.locations_2021_08_01',
@@ -97,6 +106,10 @@ SELECT aws_s3.table_import_from_s3 (
   'oq/tB601JS600kV1UG2HFhlu9gUiJfEPhlL+Iva6'
 );
 
+// add geom field in the table.
+
+// add geometry
+
 UPDATE
  locations_2021_08_01
 SET
@@ -104,6 +117,7 @@ SET
 WHERE
  geom IS NULL
 
+// create indexes
 // create index geom_idx on locations_2021_08_01 using gist(geom)
 // create index advertiser_id_idx on locations_2021_08_01 using btree(advertiser_id)
 // platform, location_at
