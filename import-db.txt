@@ -103,3 +103,9 @@ SET
  geom = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)
 WHERE
  geom IS NULL
+
+// create index geom_idx on locations_2021_08_01 using gist(geom)
+// create index advertiser_id_idx on locations_2021_08_01 using btree(advertiser_id)
+// platform, location_at
+
+
