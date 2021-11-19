@@ -67,7 +67,7 @@ function Map(props) {
 
     const mapRef = useRef(null);
     const [viewport, setViewport] = useState(DEFAULT_VIEWPORT);
-    const [interactiveLayerIds, setInteractiveLayerIds] = useState(null);
+    const [interactiveLayerIds, setInteractiveLayerIds] = useState([]);
     const [clusterSource, setClusterSource] = useState({
         type: 'FeatureCollection',
         features:[]
@@ -150,6 +150,7 @@ function Map(props) {
 
     const mapDataCallback = () => {
         const map = mapRef.current.getMap();
+        setInteractiveLayerIds([]);
         if(map.getZoom()<12){
             setClusterSource({
                 type: 'FeatureCollection',
