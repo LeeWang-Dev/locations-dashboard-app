@@ -71,7 +71,7 @@ const useStyles = makeStyles({
      useEffect(() => {
         var input = document.getElementById("input-address");
         const autocomplete = new google.maps.places.Autocomplete(input);
-        google.maps.event.addListener(autocomplete, "place_changed", function () {
+        const placeChangeHandle = google.maps.event.addListener(autocomplete, "place_changed", function () {
           var place = autocomplete.getPlace();
           if(place && place.geometry && place.formatted_address){
             setSearchLocation(place.geometry.location.toJSON());
@@ -82,7 +82,8 @@ const useStyles = makeStyles({
         fetchHighlightedDays(filter.date);
 
         return () => {
-           google.maps.event.removeListener(autocomplete);
+           //google.maps.event.clearListeners(autocomplete, 'place_changed');
+           google.maps.event.removeListener(placeChangeHandle);
         }
      }, []);
 

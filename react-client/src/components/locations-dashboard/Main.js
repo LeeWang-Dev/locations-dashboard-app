@@ -5,10 +5,10 @@ import { makeStyles } from '@mui/styles';
 import { DEFAULT_DATE } from "./../../utils/settings.js";
 
 import Header from "./Header.js";
+import SideBar from "./SideBar.js";
 import Map from "./Map.js";
+import RenderMode from "./RenderMode.js";
 import TimeSlider from "./TimeSlider.js";
-import Counts from "./Counts.js";
-import Charts from "./Charts.js";
 import { dateFormat, secondsFromDate } from '../../utils/util.js';
 
 const useStyles = makeStyles({
@@ -24,7 +24,7 @@ const useStyles = makeStyles({
       flexDirection:'row',
       backgroundColor:'#f1f6fa'
    },
-   chartContainer:{
+   sidebar:{
      width:500,
      padding:20
    },
@@ -48,6 +48,7 @@ function Main() {
       category_distance: 20
     });
     const [counts, setCounts] = useState([]);
+    const [renderMode, setRenderMode] = useState('cluster');
 
     return (
        <div className={classes.root}>
@@ -59,16 +60,20 @@ function Main() {
               setFilter={setFilter}
            />
            <div className={classes.content}>
-              <div className={classes.chartContainer}>
-                <Counts counts={counts} />
-                <Charts counts={counts} />  
+              <div className={classes.sidebar}>
+                 <SideBar counts={counts} />
               </div>
               <div className={classes.mapContainer}>
                  <Map 
                     searchLocation={searchLocation}
                     address={address}
                     filter={filter}
+                    renderMode={renderMode}
                     setCounts={setCounts}
+                 />
+                 <RenderMode 
+                    renderMode={renderMode}
+                    setRenderMode={setRenderMode}
                  />
                  <TimeSlider 
                     filter={filter}

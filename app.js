@@ -62,7 +62,7 @@ app.post('/api/clusters', async (req, res) => {
     categoryCondition = `AND ST_DWithin(geom::geography, ST_SetSRID(ST_GeomFromGeoJSON('${poiGeoJSON}'),4326)::geography, ${poiRadius})`;
   }
 
-  if(zoom>=16){
+  if(zoom>=18){
     query = `
         SELECT DISTINCT ON (advertiser_id)
             id,
@@ -77,7 +77,7 @@ app.post('/api/clusters', async (req, res) => {
             AND (location_at>=${t1} AND location_at<${t2})
         ORDER BY advertiser_id, location_at DESC
     `;
-  }else if(zoom<16 && zoom>=14){
+  }else if(zoom<18 && zoom>=14){
     query = `
       SELECT
         MIN(id) AS id,
@@ -158,7 +158,6 @@ app.post('/api/clusters', async (req, res) => {
         FROM (${query}) inputs) features;
     `;
 
-
    try {
       const result = await dbClient.query(geojsonQuery);
       res.json({
@@ -171,6 +170,69 @@ app.post('/api/clusters', async (req, res) => {
         'message': err
       });
    }
+});
+
+app.post('/api/markers', async (req,res) => {
+  const { date, timeRange, zoom, bounds, poiLocations, poiRadius } = req.body;
+
+  let t1 = timeRange[0];
+  let t2 = timeRange[1];
+
+  const tableName = getTableName(date);
+
+  let x1 = bounds[0];
+  let y1 = bounds[1];
+  let x2 = bounds[2];
+  let y2 = bounds[3];
+  
+  let query = '';
+
+  let categoryCondition = '';
+  if(poiLocations.length>0){
+    let poiGeoJSON = JSON.stringify({"type":"MultiPoint","coordinates":poiLocations});
+    categoryCondition = `AND ST_DWithin(geom::geography, ST_SetSRID(ST_GeomFromGeoJSON('${poiGeoJSON}'),4326)::geography, ${poiRadius})`;
+  }
+
+  query = `
+    SELECT DISTINCT ON (advertiser_id)
+      id,heading,geom
+    FROM
+      ${tableName}
+    WHERE
+      geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
+      ${categoryCondition}
+      AND (location_at>=${t1} AND location_at<${t2})
+    ORDER BY advertiser_id, location_at DESC
+  `;
+
+  // get geojson query
+  const geojsonQuery = `
+      SELECT jsonb_build_object(
+        'type', 'FeatureCollection',
+        'features', jsonb_agg(features.feature)
+      ) AS geojson
+      FROM (
+        SELECT jsonb_build_object(
+        'type',       'Feature',
+        'geometry',   ST_AsGeoJSON(geom)::jsonb,
+        'properties', to_jsonb(inputs) - 'geom'
+        ) AS feature
+        FROM (${query}) inputs) features;
+  `;
+
+   try {
+      const result = await dbClient.query(geojsonQuery);
+      res.json({
+        'status': 'success',
+        'result': result.rows[0].geojson
+      });
+   } catch (err) {
+      res.json({
+        'status': 'failed',
+        'message': err
+      });
+   } 
+
 });
 
 app.post('/api/counts', async (req, res) => {
