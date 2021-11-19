@@ -77,7 +77,7 @@ app.post('/api/clusters', async (req, res) => {
             AND (location_at>=${t1} AND location_at<${t2})
         ORDER BY advertiser_id, location_at DESC
     `;
-  }else if(zoom<18 && zoom>=14){
+  }else{
     query = `
       SELECT
         MIN(id) AS id,
@@ -100,7 +100,8 @@ app.post('/api/clusters', async (req, res) => {
         ) AS cluster_table
       GROUP BY cluster_id
     `;
-  }else if(zoom<14 && zoom>=12){
+  }  
+  /*  
     query = `
       SELECT
         MIN(id) AS id,
@@ -120,29 +121,12 @@ app.post('/api/clusters', async (req, res) => {
             ${categoryCondition}
             AND (location_at>=${t1} AND location_at<${t2})
          ORDER BY advertiser_id, location_at DESC
+         LIMIT 20000
         ) AS cluster_table
       GROUP BY cluster_id
     `;
-    /*
-    query = `
-      SELECT
-        count(*) AS point_count,
-        ST_Centroid(ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)) AS geom
-      FROM
-      ( SELECT
-          advertiser_id          
-        FROM
-          ${tableName}
-        WHERE
-          geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
-          ${categoryCondition}
-          AND (location_at>=${t1} AND location_at<${t2})
-        GROUP BY advertiser_id
-      ) AS group_table
-    `;
-    */
-  }
-  
+  */
+
    // get geojson query
    const geojsonQuery = `
       SELECT jsonb_build_object(

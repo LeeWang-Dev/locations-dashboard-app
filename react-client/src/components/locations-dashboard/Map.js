@@ -151,18 +151,6 @@ function Map(props) {
     const mapDataCallback = () => {
         const map = mapRef.current.getMap();
         setInteractiveLayerIds([]);
-        if(map.getZoom()<12){
-            setClusterSource({
-                type: 'FeatureCollection',
-                features:[]
-            });
-            setHeatmapSource({
-                type: 'FeatureCollection',
-                features:[]
-            });
-            setCounts([]);
-            return;
-        } 
         if(timeout){
             clearTimeout(timeout);
         }

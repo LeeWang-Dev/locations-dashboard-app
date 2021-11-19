@@ -25,7 +25,7 @@ const useStyles = makeStyles({
       backgroundColor:'#f1f6fa'
    },
    sidebar:{
-     width:500,
+     width:450,
      padding:20
    },
    mapContainer:{
