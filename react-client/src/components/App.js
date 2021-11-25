@@ -16,16 +16,21 @@ let theme = createTheme({
     MuiTextField:{
       styleOverrides: {
         root: {
-          paddingLeft:10,
-          paddingRight:10,
-          borderRadius:72,
-          backgroundColor:'#f1f6fa',
           boxSizing:'border-box'
         },
       },
     },
     MuiOutlinedInput:{
       styleOverrides: {
+        root:{
+           padding:'0 16px',
+           borderRadius:72,
+           backgroundColor:'#f1f6fa'
+        },
+        input:{
+           padding:'14px 8px',
+           color:'#162c36'
+        },
         notchedOutline: {
           border:0
         },

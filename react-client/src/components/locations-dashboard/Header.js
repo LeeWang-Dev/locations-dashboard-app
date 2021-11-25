@@ -27,7 +27,7 @@ import { getDays } from "../../services/days.js";
 const useStyles = makeStyles({
     header:{
        width:'100%',
-       padding:'10px 20px',
+       padding:10,
        backgroundColor:'white'
     },
     logo:{
@@ -74,6 +74,7 @@ const useStyles = makeStyles({
         const placeChangeHandle = google.maps.event.addListener(autocomplete, "place_changed", function () {
           var place = autocomplete.getPlace();
           if(place && place.geometry && place.formatted_address){
+            console.log(place);
             setSearchLocation(place.geometry.location.toJSON());
             setAddress(place.formatted_address);
           }
