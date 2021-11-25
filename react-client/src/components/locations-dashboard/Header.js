@@ -40,9 +40,8 @@ const useStyles = makeStyles({
  function Header(props) {
      const classes = useStyles();
      const { 
-         setSearchLocation,
-         address,
-         setAddress,
+         searchPlace,
+         setSearchPlace,
          filter,
          setFilter
      } = props;
@@ -74,9 +73,25 @@ const useStyles = makeStyles({
         const placeChangeHandle = google.maps.event.addListener(autocomplete, "place_changed", function () {
           var place = autocomplete.getPlace();
           if(place && place.geometry && place.formatted_address){
-            console.log(place);
-            setSearchLocation(place.geometry.location.toJSON());
-            setAddress(place.formatted_address);
+            setSearchPlace({
+              id:place.place_id,
+              location:[
+                place.geometry.location.lng(),
+                place.geometry.location.lat()
+              ],
+              viewport:[
+                place.geometry.viewport.getSouthWest().lng(),
+                place.geometry.viewport.getSouthWest().lat(),
+                place.geometry.viewport.getNorthEast().lng(),
+                place.geometry.viewport.getNorthEast().lat()
+              ],
+              name:place.name,
+              address:place.formatted_address,
+              type:place.types?place.types[0]:'',
+              rating:place.rating,
+              user_ratings_total:place.user_ratings_total,
+              url:place.url
+            });
           }
         });
 
@@ -112,12 +127,12 @@ const useStyles = makeStyles({
                           <InputAdornment position="end">
                               <IconButton aria-label="toggle password visibility"
                                   onClick={()=>{
-                                      setAddress('');
+                                      setSearchPlace(null);
                                       document.getElementById("input-address").value='';
                                   }}
                                   onMouseDown={(e)=>e.preventDefault()}
                                   edge="end"
-                              >{address && <CloseIcon />}
+                              >{(searchPlace && searchPlace.address) && <CloseIcon />}
                               </IconButton>
                           </InputAdornment>
                         )

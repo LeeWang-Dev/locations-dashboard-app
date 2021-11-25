@@ -10,6 +10,7 @@ import ReactMapGL, {
            Marker,
            ScaleControl,
            NavigationControl,
+           WebMercatorViewport,
            FlyToInterpolator
        } from 'react-map-gl';
 
@@ -58,8 +59,7 @@ let timeout = null;
 function Map(props) {
     const classes = useStyles();
     const { 
-       searchLocation,
-       address,
+       searchPlace,
        filter,
        renderMode,
        setCounts
@@ -123,18 +123,25 @@ function Map(props) {
     }, []);
 
     useEffect(()=>{
-        if(searchLocation){
+        if(searchPlace){
+            const vp = new WebMercatorViewport(viewport);
+            const {longitude, latitude, zoom} = vp.fitBounds(
+                [ 
+                    [searchPlace.viewport[0], searchPlace.viewport[1]],
+                    [searchPlace.viewport[2], searchPlace.viewport[3]]
+                ],
+                { padding: 40 }
+            );
             setViewport({
-               ...viewport,
-               latitude: searchLocation.lat,
-               longitude: searchLocation.lng,
-               zoom: 14,
-               //transitionDuration: 4000,
-               //transitionInterpolator: new FlyToInterpolator(),
-               ////transitionEasing: d3.easeCubic
+                ...viewport,
+                longitude:searchPlace.location[0],
+                latitude:searchPlace.location[1],
+                zoom,
+                //transitionInterpolator: new FlyToInterpolator(),
+                //transitionDuration: 1000
             });
         }
-    }, [searchLocation]);
+    }, [searchPlace]);
 
     useEffect(()=>{
 
@@ -412,13 +419,13 @@ function Map(props) {
             )}
             <NavigationControl style={{ top:10,right:10}}/>
             <ScaleControl style={{bottom:10,left:10}} />
-            {(searchLocation && address) && (
+            {searchPlace && (
                 <>
-                <Marker longitude={searchLocation.lng} latitude={searchLocation.lat} offsetLeft={-16} offsetTop={-32}>
+                <Marker longitude={searchPlace.location[0]} latitude={searchPlace.location[1]} offsetLeft={-16} offsetTop={-32}>
                     <img src={iconSearch} alt="marker" />
                 </Marker>
-                <Marker longitude={searchLocation.lng} latitude={searchLocation.lat} offsetLeft={16} offsetTop={-46}>
-                    <div className={classes.addressLabel}>{address}</div>
+                <Marker longitude={searchPlace.location[0]} latitude={searchPlace.location[1]} offsetLeft={16} offsetTop={-46}>
+                    <div className={classes.addressLabel}>{searchPlace.address}</div>
                 </Marker>
                 </>
             )}

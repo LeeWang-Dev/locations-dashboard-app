@@ -36,8 +36,7 @@ const useStyles = makeStyles({
 
 function Main() {
     const classes = useStyles();
-    const [searchLocation, setSearchLocation] = useState(null);
-    const [address, setAddress] = useState(null);
+    const [searchPlace, setSearchPlace] = useState(null);
     const [filter, setFilter] = useState({
        date: DEFAULT_DATE,
        timeRange: [
@@ -52,10 +51,9 @@ function Main() {
 
     return (
        <div className={classes.root}>
-           <Header 
-              setSearchLocation={setSearchLocation}
-              address={address}
-              setAddress={setAddress}
+           <Header
+              searchPlace={searchPlace} 
+              setSearchPlace={setSearchPlace}
               filter={filter}
               setFilter={setFilter}
            />
@@ -65,8 +63,7 @@ function Main() {
               </div>
               <div className={classes.mapContainer}>
                  <Map 
-                    searchLocation={searchLocation}
-                    address={address}
+                    searchPlace={searchPlace}
                     filter={filter}
                     renderMode={renderMode}
                     setCounts={setCounts}

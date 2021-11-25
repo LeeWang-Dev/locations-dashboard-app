@@ -184,7 +184,7 @@ function TrackingMap(props){
                 ...viewport,
                 longitude: longitude,
                 latitude: latitude,
-                zoom: zoom-1,
+                zoom: zoom>20?20:zoom-1,
             });
 
             // measured points
@@ -314,7 +314,7 @@ function TrackingMap(props){
                 mapStyle="mapbox://styles/mapbox/light-v10"
                 mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
                 attributionControl={false}
-                maxZoom={22}
+                maxZoom={20}
                 //minZoom={14}
                 ref={mapRef}
                 interactiveLayerIds={interactiveLayerIds}

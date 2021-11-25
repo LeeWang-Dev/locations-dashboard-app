@@ -15,6 +15,7 @@ const useStyles = makeStyles({
         right:0,
         '& .MuiPaper-root':{
            width:'50%',
+           //maxWidth:600,
            paddingTop:10,
            paddingBottom:5,
            paddingLeft:40,
@@ -23,7 +24,7 @@ const useStyles = makeStyles({
         },
         '&.MuiSlider-root':{
           //position:'absolute'
-          width:'60%'
+          //width:'60%'
        }
     }
  });
