@@ -13,6 +13,23 @@ let theme = createTheme({
         },
       },
     },
+    MuiTypography:{
+      styleOverrides: {
+        root:{
+           lineHeight:'normal'
+        }
+     }
+    },
+    MuiButton:{
+      styleOverrides: {
+         root:{
+            padding:'16px 20px',
+            borderRadius:50,
+            lineHeight:'normal',
+            textTransform:'none'
+         }
+      }
+    },
     MuiTextField:{
       styleOverrides: {
         root: {
@@ -90,7 +107,59 @@ let theme = createTheme({
         }
       }
     },  
+    MuiBackdrop:{
+      styleOverrides: {
+         root:{
+            //backgroundColor:'rgba(0,0,0,0.8)'
+         }
+      }
+   },
+   MuiDialog:{
+    styleOverrides: {
+       root:{
+          '& .MuiDialog-paper':{
+             width:480,
+             paddingTop:20,
+             paddingBottom:20,
+             paddingLeft:30,
+             paddingRight:30
+          }
+       }
+    }
+   },
+   MuiDialogTitle:{
+    styleOverrides: {
+       root:{
+          //marginBottom: 20,
+          borderBottom:'1px solid #e3ebf1'
+       }
+    }
+   },
+   MuiDialogContent:{
+    styleOverrides: {
+       root:{
+          padding: 10
+       }
+    }
+   },
+   MuiDialogActions:{
+    styleOverrides: {
+       root:{
+          padding:20
+       }
+    }
+   },
+   MuiListItemButton:{
+    styleOverrides:{
+       root:{
+          borderRadius:8,
+          '&:hover':{
+            backgroundColor:'#f1f6fa'
+          }
+       }
+    }
   }
+ }
 });
 
 theme = responsiveFontSizes(theme);

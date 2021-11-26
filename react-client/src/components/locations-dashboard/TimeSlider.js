@@ -15,7 +15,7 @@ const useStyles = makeStyles({
         right:0,
         '& .MuiPaper-root':{
            width:'50%',
-           //maxWidth:600,
+           maxWidth:600,
            paddingTop:10,
            paddingBottom:5,
            paddingLeft:40,

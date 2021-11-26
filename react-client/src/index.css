@@ -15,7 +15,8 @@ code {
 }
 
 *::-webkit-scrollbar{
-  width: 10px;
+  width: 5px;
+  border-radius: 50%;
   background-color: #f1f6fa;
 }
 *::-webkit-scrollbar-track{

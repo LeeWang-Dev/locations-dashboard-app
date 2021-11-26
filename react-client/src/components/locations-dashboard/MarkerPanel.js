@@ -32,7 +32,7 @@ const useStyles = makeStyles({
     drawer:{
        '& .MuiBackdrop-root':{
            //position:'absolute'
-           //backgroundColor:'transparent' //'rgba(0,0,0,0.2)'
+           //backgroundColor: 'rgba(0,0,0,0.2)'
        },
        '&>.MuiPaper-root':{
            //position: 'absolute',
@@ -112,13 +112,6 @@ function MarkerPanel(props) {
     });
     const [sliderValue, setSliderValue] = useState(0);
     const [sliderLabel, setSliderLabel] = useState('');
-    const [trackData, setTrackData] = useState(null);
-    const [trackSource, setTrackSource] = useState({
-        type: 'FeatureCollection',
-        features:[]
-    });
-
-    //const [interpolateLine, setInterpolateSource] = useState(null);
 
     const [viewport, setViewport] = useState({
         longitude: markerPanelInfo.geometry.coordinates[0],
@@ -181,19 +174,6 @@ function MarkerPanel(props) {
             setSliderValue(t0+86399);
             setSliderLabel(`UTC ${timeFormat(86399)} ${markerPanelInfo.date}`);
           }
-          /*
-          res = await getTracking({
-                date: markerPanelInfo.date,
-                id: markerPanelInfo.id
-            });
-            //console.log(res);
-            if(res.status === 'success'){
-            //setTrackSource(res.result);
-
-            }else{
-            //setTrackSource(null);
-            }
-            */
        }
    }, [toggleValue])
 

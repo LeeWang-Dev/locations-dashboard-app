@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { makeStyles } from '@mui/styles';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -7,7 +7,7 @@ const useStyles = makeStyles({
     togglePanel:{
         position:'absolute',
         top:10,
-        left:10
+        right:10
     }
  });
 

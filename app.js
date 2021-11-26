@@ -66,7 +66,6 @@ app.post('/api/clusters', async (req, res) => {
     query = `
         SELECT DISTINCT ON (advertiser_id)
             id,
-            heading,
             1 AS point_count,
             geom
         FROM
@@ -81,14 +80,12 @@ app.post('/api/clusters', async (req, res) => {
     query = `
       SELECT
         MIN(id) AS id,
-        MIN(heading) AS heading,
         COUNT(cluster_id) AS point_count,
         ST_CENTROID(ST_UNION(geom)) AS geom
       FROM
         (SELECT DISTINCT ON (advertiser_id)
             id,
             ST_ClusterDBSCAN(geom,${2*Math.PI/(Math.pow(2,zoom-1))},1) OVER () cluster_id,
-            heading,
             geom
          FROM
             ${tableName}
@@ -105,14 +102,12 @@ app.post('/api/clusters', async (req, res) => {
     query = `
       SELECT
         MIN(id) AS id,
-        MIN(heading) AS heading,
         COUNT(cluster_id) AS point_count,
         ST_CENTROID(ST_UNION(geom)) AS geom
       FROM
         (SELECT DISTINCT ON (advertiser_id)
             id,
             ST_ClusterKMeans(geom, 12) OVER() AS cluster_id,
-            heading,
             geom
          FROM
             ${tableName}
@@ -179,7 +174,7 @@ app.post('/api/markers', async (req,res) => {
 
   query = `
     SELECT DISTINCT ON (advertiser_id)
-      id,heading,geom
+      id,geom
     FROM
       ${tableName}
     WHERE
@@ -330,6 +325,116 @@ app.post('/api/marker/tracking', async (req, res) => {
       res.json({
         'status': 'success',
         'result': result.rows[0].geojson
+      });
+  } catch (err) {
+      res.json({
+        'status': 'failed',
+        'message': err
+      });
+  }
+});
+
+app.get('/api/places', async (req, res) => {
+  const query = `
+    SELECT
+      place_id,
+      location::json AS location,
+      viewport::json AS viewport,
+      name,
+      address,
+      type,
+      rating,
+      user_ratings_total,
+      url,
+      image
+    FROM
+      places
+    ORDER BY name  
+  `;
+  try {
+    const result = await dbClient.query(query);
+    res.json({
+      'status': 'success',
+      'result': result.rows
+    });
+  } catch (err) {
+    res.json({
+      'status': 'failed',
+      'message': err
+    });
+  }
+});
+
+app.post('/api/place/add', async (req, res) => {
+
+  const { 
+    place_id,
+    location,
+    viewport,
+    name,
+    address,
+    type,
+    rating,
+    user_ratings_total,
+    url,
+    image
+  } = req.body;
+  
+  const query = `
+     INSERT INTO 
+        places(
+          place_id,
+          location,
+          viewport,
+          name,
+          address,
+          type,
+          rating,
+          user_ratings_total,
+          url,
+          image
+        )
+     VALUES(
+        '${place_id}',
+        '${JSON.stringify(location)}',
+        '${JSON.stringify(viewport)}',
+        '${name}',
+        '${address}',
+        '${type}',
+         ${rating},
+         ${user_ratings_total},
+        '${url}',
+        '${image}'
+     )   
+  `;
+
+  try {
+      const result = await dbClient.query(query);
+      res.json({
+        'status': 'success',
+        'message': 'Inserted successfully'
+      });
+  } catch (err) {
+      res.json({
+        'status': 'failed',
+        'message': err
+      });
+  }
+});
+
+app.post('/api/place/delete', async (req, res) => {
+  const { place_id } = req.body;
+  const query = `
+     DELETE FROM
+       places
+     WHERE
+       place_id='${place_id}'
+  `;
+  try {
+      const result = await dbClient.query(query);
+      res.json({
+        'status': 'success',
+        'message': 'Deleted successfully'
       });
   } catch (err) {
       res.json({

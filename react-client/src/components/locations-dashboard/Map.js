@@ -25,7 +25,7 @@ import { getClusters } from "../../services/cluster.js";
 import { getMarkers } from "../../services/marker.js";
 import { getCounts } from "../../services/counts.js";
 
-import iconMarker from "../../assets/images/marker-icon.png";
+import iconMarker from "../../assets/images/user-icon.png";
 import iconSearch from "../../assets/images/search-marker.png";
 
 import MarkerPanel from "./MarkerPanel/MarkerPanel.js";
@@ -125,7 +125,7 @@ function Map(props) {
     useEffect(()=>{
         if(searchPlace){
             const vp = new WebMercatorViewport(viewport);
-            const {longitude, latitude, zoom} = vp.fitBounds(
+            const { zoom } = vp.fitBounds( //const {longitude, latitude, zoom}
                 [ 
                     [searchPlace.viewport[0], searchPlace.viewport[1]],
                     [searchPlace.viewport[2], searchPlace.viewport[3]]
@@ -137,8 +137,8 @@ function Map(props) {
                 longitude:searchPlace.location[0],
                 latitude:searchPlace.location[1],
                 zoom,
-                //transitionInterpolator: new FlyToInterpolator(),
-                //transitionDuration: 1000
+                transitionInterpolator: new FlyToInterpolator(),
+                transitionDuration: 1000
             });
         }
     }, [searchPlace]);
@@ -305,26 +305,28 @@ function Map(props) {
                         filter={['==', 'point_count', 1]}
                         layout={{
                            'icon-image': 'marker-icon',
-                           'icon-size': 0.6,
-                           'icon-rotate': ["get","heading"],
+                           'icon-size': 0.5,
+                           'icon-offset':[0, -32],
+                           //'icon-rotate': ["get","heading"],
                            'icon-allow-overlap':true,
                            'icon-ignore-placement': true,
-                           'icon-rotation-alignment':'map', // viewport
-                           'icon-pitch-alignment':'viewport'
+                           //'icon-rotation-alignment':'map', // viewport
+                           //'icon-pitch-alignment':'viewport'
                         }}
                     />
                     {markerPanelInfo.open && (
                         <Layer
                             id='select-point-layer'
-                            type='circle'
+                            type='symbol'
                             source='clusterSource'
                             filter={['==', 'id', markerPanelInfo.id]}
-                            paint={{
-                              'circle-radius':20,
-                              'circle-color': 'transparent',
-                              'circle-stroke-color':'#ff844b',
-                              'circle-stroke-width':2
-                            }}
+                            layout={{
+                                'icon-image': 'marker-icon',
+                                'icon-size': 0.7,
+                                'icon-offset':[0, -32],
+                                'icon-allow-overlap':true,
+                                'icon-ignore-placement': true,
+                             }}
                         />
                     )}
                 </Source>
@@ -393,31 +395,33 @@ function Map(props) {
                         minzoom={18}
                         layout={{
                             'icon-image': 'marker-icon',
-                            'icon-size': 0.6,
-                            'icon-rotate': ["get","heading"],
+                            'icon-size': 0.5,
+                            'icon-offset':[0, -32],
+                            //'icon-rotate': ["get","heading"],
                             'icon-allow-overlap':true,
                             'icon-ignore-placement': true,
-                            'icon-rotation-alignment':'map', // viewport
-                            'icon-pitch-alignment':'viewport'
+                            //'icon-rotation-alignment':'map', // viewport
+                            //'icon-pitch-alignment':'viewport'
                         }}
                     />
                     {markerPanelInfo.open && (
                         <Layer
                             id='select-point-layer'
-                            type='circle'
-                            source='heatmapSource'
+                            type='symbol'
+                            source='clusterSource'
                             filter={['==', 'id', markerPanelInfo.id]}
-                            paint={{
-                                'circle-radius':20,
-                                'circle-color': 'transparent',
-                                'circle-stroke-color':'#ff844b',
-                                'circle-stroke-width':2
+                            layout={{
+                                'icon-image': 'marker-icon',
+                                'icon-size': 0.7,
+                                'icon-offset':[0, -32],
+                                'icon-allow-overlap':true,
+                                'icon-ignore-placement': true,
                             }}
                         />
                     )}
                 </Source>
             )}
-            <NavigationControl style={{ top:10,right:10}}/>
+            <NavigationControl style={{ top:70,right:10}}/>
             <ScaleControl style={{bottom:10,left:10}} />
             {searchPlace && (
                 <>

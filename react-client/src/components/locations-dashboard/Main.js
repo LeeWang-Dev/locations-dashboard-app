@@ -8,7 +8,10 @@ import Header from "./Header.js";
 import SideBar from "./SideBar.js";
 import Map from "./Map.js";
 import RenderMode from "./RenderMode.js";
+import Counts from "./Counts.js";
+import PieChart from './PieChart.js';
 import TimeSlider from "./TimeSlider.js";
+
 import { dateFormat, secondsFromDate } from '../../utils/util.js';
 
 const useStyles = makeStyles({
@@ -19,18 +22,23 @@ const useStyles = makeStyles({
       height:'100vh'
    },
    content:{
+      position:'relative',
       flex:1,
       display:'flex',
       flexDirection:'row',
-      backgroundColor:'#f1f6fa'
+      height:0,
+      //backgroundColor:'#f1f6fa'
    },
    sidebar:{
-     width:450,
-     padding:20
+     position:'relative',
+     display:'flex',
+     flexDirection:'column',
+     width:400,
+     padding:0,
    },
    mapContainer:{
+      position:'relative',
       flex:1,
-      position:'relative'
    }
 });
 
@@ -59,7 +67,10 @@ function Main() {
            />
            <div className={classes.content}>
               <div className={classes.sidebar}>
-                 <SideBar counts={counts} />
+                 <SideBar 
+                    searchPlace={searchPlace}
+                    setSearchPlace={setSearchPlace} 
+                 />
               </div>
               <div className={classes.mapContainer}>
                  <Map 
@@ -72,6 +83,8 @@ function Main() {
                     renderMode={renderMode}
                     setRenderMode={setRenderMode}
                  />
+                 <Counts counts={counts} />
+                 <PieChart counts={counts} />
                  <TimeSlider 
                     filter={filter}
                     setFilter={setFilter}

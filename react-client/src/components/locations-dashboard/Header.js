@@ -31,7 +31,7 @@ const useStyles = makeStyles({
        backgroundColor:'white'
     },
     logo:{
-        height: 80
+        height: 75
     }
  });
  
@@ -73,8 +73,9 @@ const useStyles = makeStyles({
         const placeChangeHandle = google.maps.event.addListener(autocomplete, "place_changed", function () {
           var place = autocomplete.getPlace();
           if(place && place.geometry && place.formatted_address){
+            var placePhotoUrl = place.photos[0].getUrl({maxWidth:128}); 
             setSearchPlace({
-              id:place.place_id,
+              place_id:place.place_id,
               location:[
                 place.geometry.location.lng(),
                 place.geometry.location.lat()
@@ -90,7 +91,9 @@ const useStyles = makeStyles({
               type:place.types?place.types[0]:'',
               rating:place.rating,
               user_ratings_total:place.user_ratings_total,
-              url:place.url
+              url:place.url,
+              imageLink: placePhotoUrl,
+              image:''
             });
           }
         });
@@ -103,8 +106,16 @@ const useStyles = makeStyles({
         }
      }, []);
 
+     useEffect(() => {
+        if(searchPlace){
+          document.getElementById("input-address").value=searchPlace.address;
+        }else{
+          document.getElementById("input-address").value='';
+        }
+     },[searchPlace]);
+
      return (
-        <Grid container className={classes.header} spacing={2} alignItems="center">
+        <Grid container className={classes.header} spacing={1} alignItems="center">
             <Grid container item lg={3} md={12} justifyContent="center">
                 <img src={imgLogo} className={classes.logo} />
             </Grid>
@@ -126,10 +137,7 @@ const useStyles = makeStyles({
                         endAdornment: (
                           <InputAdornment position="end">
                               <IconButton aria-label="toggle password visibility"
-                                  onClick={()=>{
-                                      setSearchPlace(null);
-                                      document.getElementById("input-address").value='';
-                                  }}
+                                  onClick={()=>setSearchPlace(null)}
                                   onMouseDown={(e)=>e.preventDefault()}
                                   edge="end"
                               >{(searchPlace && searchPlace.address) && <CloseIcon />}
