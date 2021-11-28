@@ -178,11 +178,9 @@ function MarkerInfo(props){
             </Paper>
             </>
             :
-            <>
             <Grid contiainer justifyContent="center">
                 <CircularProgress />
             </Grid>
-            </>
     );
 }
 
