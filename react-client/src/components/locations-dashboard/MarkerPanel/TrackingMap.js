@@ -15,7 +15,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import mapboxgl from "mapbox-gl";
 import { MAPBOX_ACCESS_TOKEN } from "../../../utils/settings.js";
 
-import * as turf from '@turf/turf'
+import * as turf from '@turf/turf';
 
 import iconMarker from "../../../assets/images/marker-icon.png";
 
@@ -95,20 +95,18 @@ function TrackingMap(props){
     const [hoverInfo, setHoverInfo] = useState(null);
 
     const onHover = useCallback(e => {
+        var newHoverInfo = null;
         if(e.features && e.features.length>0){
             const feature = e.features[0];
             if(feature.layer.id==='points-layer'){
-                setHoverInfo({
+                newHoverInfo = {
                     longitude: e.lngLat[0],
                     latitude: e.lngLat[1],
                     data: feature.properties
-                });
-            }else{
-               setHoverInfo(null);
+                }
             }
-        }else{
-            setHoverInfo(null);
         }
+        setHoverInfo(newHoverInfo);
     }, []);
 
     const handleSliderChange = (event, newValue) => {
@@ -201,7 +199,7 @@ function TrackingMap(props){
                         type:'FeatureCollection',
                         features:[feature]
                     });
-                    t = parseInt(feature.properties["location_at"]);
+                    t = parseInt(feature.properties["timestamp"]/1000);
                     setSliderValue(t);
                     setSliderLabel(`UTC ${timeFormat(t-secondsFromDate(params.date))} ${params.date}`);
                     return;
@@ -211,8 +209,8 @@ function TrackingMap(props){
             // calculate track points
             let newTrackPoints = [];
             for(let i=0;i<features.length-1;i++){
-                var t1 = parseInt(features[i].properties['location_at']);
-                var t2 = parseInt(features[i+1].properties['location_at']);
+                var t1 = parseInt(features[i].properties['timestamp']/1000);
+                var t2 = parseInt(features[i+1].properties['timestamp']/1000);
                 var dm=(t2-t1)/30;
                 var bearing = turf.bearing(features[i], features[i+1]);
                 if(dm>1){

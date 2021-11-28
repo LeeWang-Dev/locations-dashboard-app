@@ -7,6 +7,8 @@ import Typography from '@mui/material/Typography';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
+import PermDeviceInformationIcon from '@mui/icons-material/PermDeviceInformation';
+
 import MarkerInfo from "./MarkerInfo.js";
 import TrackingMap from './TrackingMap.js';
 
@@ -24,7 +26,9 @@ const useStyles = makeStyles({
            minWidth:400,
            padding:'20px 40px',
            backgroundColor:'#f1f6fa',
-           boxSizing:'border-box'
+           boxSizing:'border-box',
+           overflowX:'hidden',
+           overflowY:'auto'
        }
     },
     drawerHeader:{
@@ -69,21 +73,26 @@ function MarkerPanel(props) {
             open={true}
             onClose={toggleDrawer(false)}
         >
-          <Grid container className={classes.drawerHeader} justifyContent="space-between" alignItems="center">
-                <Typography variant="h6">
-                    Device Information
-                </Typography>
-                <ToggleButtonGroup 
-                    value={toggleValue} exclusive
-                    onChange={handleToggleButton} aria-label="marker button group"
-                >
-                    <ToggleButton value="properties" aria-label="Properties">
-                       Properties
-                    </ToggleButton>
-                    <ToggleButton value="tracking" aria-label="Tracking">
-                       Tracking
-                    </ToggleButton>
-                </ToggleButtonGroup>
+          <Grid container spacing={1} className={classes.drawerHeader} alignItems="center">
+                <Grid item md={6} xs={12} container>
+                    <PermDeviceInformationIcon color="warning" style={{marginRight:10}}/>
+                    <Typography variant="h6" style={{flex:1}}>
+                        Device Information
+                    </Typography>
+                </Grid>    
+                <Grid item md={6} xs={12} container justifyContent="flex-end">
+                    <ToggleButtonGroup 
+                        value={toggleValue} exclusive
+                        onChange={handleToggleButton} aria-label="marker button group"
+                    >
+                        <ToggleButton value="properties" aria-label="Properties">
+                        Properties
+                        </ToggleButton>
+                        <ToggleButton value="tracking" aria-label="Tracking">
+                        Tracking
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </Grid>    
           </Grid>
           {toggleValue === 'properties' && (
              <MarkerInfo params={markerPanelInfo} />

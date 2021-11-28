@@ -8,10 +8,10 @@ const {Client} = require('pg');
 const PORT = normalizePort(process.env.PORT || '8080');
 
 const dbClient = new Client({
-  user: 'leewang',
-  host: 'lee-instance.ciuz5stfwmcj.us-east-1.rds.amazonaws.com',
+  user: 'lee',
+  host: 'jp-ground.ciuz5stfwmcj.us-east-1.rds.amazonaws.com',
   database: 'locations_db',
-  password: 'testing1234',
+  password: 'Test1234',
   port: 5432,
   ssl: {
     rejectUnauthorized: false,
@@ -44,8 +44,8 @@ app.post('/api/clusters', async (req, res) => {
 
   const { date, timeRange, zoom, bounds, poiLocations, poiRadius } = req.body;
 
-  let t1 = timeRange[0];
-  let t2 = timeRange[1];
+  let t1 = timeRange[0]*1000;
+  let t2 = timeRange[1]*1000;
 
   const tableName = getTableName(date);
 
@@ -64,7 +64,7 @@ app.post('/api/clusters', async (req, res) => {
 
   if(zoom>=18){
     query = `
-        SELECT DISTINCT ON (advertiser_id)
+        SELECT DISTINCT ON (device_id)
             id,
             1 AS point_count,
             geom
@@ -73,8 +73,8 @@ app.post('/api/clusters', async (req, res) => {
         WHERE
             geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
             ${categoryCondition}
-            AND (location_at>=${t1} AND location_at<${t2})
-        ORDER BY advertiser_id, location_at DESC
+            AND (timestamp>=${t1} AND timestamp<${t2})
+        ORDER BY device_id, timestamp DESC
     `;
   }else{
     query = `
@@ -83,7 +83,7 @@ app.post('/api/clusters', async (req, res) => {
         COUNT(cluster_id) AS point_count,
         ST_CENTROID(ST_UNION(geom)) AS geom
       FROM
-        (SELECT DISTINCT ON (advertiser_id)
+        (SELECT DISTINCT ON (device_id)
             id,
             ST_ClusterDBSCAN(geom,${2*Math.PI/(Math.pow(2,zoom-1))},1) OVER () cluster_id,
             geom
@@ -92,8 +92,8 @@ app.post('/api/clusters', async (req, res) => {
          WHERE
             geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
             ${categoryCondition}
-            AND (location_at>=${t1} AND location_at<${t2})
-         ORDER BY advertiser_id, location_at DESC
+            AND (timestamp>=${t1} AND timestamp<${t2})
+         ORDER BY device_id, timestamp DESC
         ) AS cluster_table
       GROUP BY cluster_id
     `;
@@ -105,7 +105,7 @@ app.post('/api/clusters', async (req, res) => {
         COUNT(cluster_id) AS point_count,
         ST_CENTROID(ST_UNION(geom)) AS geom
       FROM
-        (SELECT DISTINCT ON (advertiser_id)
+        (SELECT DISTINCT ON (device_id)
             id,
             ST_ClusterKMeans(geom, 12) OVER() AS cluster_id,
             geom
@@ -114,8 +114,8 @@ app.post('/api/clusters', async (req, res) => {
          WHERE
             geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
             ${categoryCondition}
-            AND (location_at>=${t1} AND location_at<${t2})
-         ORDER BY advertiser_id, location_at DESC
+            AND (timestamp>=${t1} AND timestamp<${t2})
+         ORDER BY device_id, timestamp DESC
          LIMIT 20000
         ) AS cluster_table
       GROUP BY cluster_id
@@ -154,8 +154,8 @@ app.post('/api/clusters', async (req, res) => {
 app.post('/api/markers', async (req,res) => {
   const { date, timeRange, zoom, bounds, poiLocations, poiRadius } = req.body;
 
-  let t1 = timeRange[0];
-  let t2 = timeRange[1];
+  let t1 = timeRange[0]*1000;
+  let t2 = timeRange[1]*1000;
 
   const tableName = getTableName(date);
 
@@ -173,15 +173,15 @@ app.post('/api/markers', async (req,res) => {
   }
 
   query = `
-    SELECT DISTINCT ON (advertiser_id)
+    SELECT DISTINCT ON (device_id)
       id,geom
     FROM
       ${tableName}
     WHERE
       geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
       ${categoryCondition}
-      AND (location_at>=${t1} AND location_at<${t2})
-    ORDER BY advertiser_id, location_at DESC
+      AND (timestamp>=${t1} AND timestamp<${t2})
+    ORDER BY device_id, timestamp DESC
   `;
 
   // get geojson query
@@ -217,8 +217,8 @@ app.post('/api/markers', async (req,res) => {
 app.post('/api/counts', async (req, res) => {
   const { date, timeRange, bounds, poiLocations, poiRadius } = req.body;
 
-  let t1 = timeRange[0];
-  let t2 = timeRange[1];
+  let t1 = timeRange[0]*1000;
+  let t2 = timeRange[1]*1000;
 
   const tableName = getTableName(date);
 
@@ -236,22 +236,22 @@ app.post('/api/counts', async (req, res) => {
 
   query = `
     SELECT
-      platform,
-      count(platform) AS count
+      id_type,
+      count(id_type) AS count
     FROM
       (
         SELECT 
-          advertiser_id,
-          MIN(platform) AS platform
+          device_id,
+          MIN(id_type) AS id_type
         FROM
           ${tableName}
         WHERE
           geom && ST_MakeEnvelope(${x1},${y1},${x2},${y2}, 4326)
           ${categoryCondition}
-          AND (location_at>=${t1} AND location_at<${t2})
-        GROUP BY advertiser_id 
+          AND (timestamp>=${t1} AND timestamp<${t2})
+        GROUP BY device_id 
       ) AS group_table 
-    GROUP BY platform
+    GROUP BY id_type
   `;
 
   try {
@@ -293,17 +293,19 @@ app.post('/api/marker/tracking', async (req, res) => {
   const tableName = getTableName(date);
   var query = `
      SELECT 
-      id, location_at,
-      latitude, longitude, geom,
-      altitude, heading,
-      speed, horizontal_accuracy, vertical_accuracy
+      id,
+      latitude,
+      longitude,
+      horizontal_accuracy,
+      timestamp,
+      geom
      FROM
       ${tableName}
      WHERE
-      advertiser_id=(
-        SELECT advertiser_id FROM ${tableName} WHERE id=${id}
+      device_id=(
+        SELECT device_id FROM ${tableName} WHERE id=${id}
       )
-     ORDER BY location_at
+     ORDER BY timestamp
   `;
 
   const geojsonQuery = `
@@ -349,7 +351,6 @@ app.get('/api/places', async (req, res) => {
       image
     FROM
       places
-    ORDER BY name  
   `;
   try {
     const result = await dbClient.query(query);

@@ -193,6 +193,7 @@ function Map(props) {
                     poiLocations: poiLocations,
                     poiRadius: filter.category_distance
                 });
+                
                 if(res.status === 'success'){
                     if(res.result && res.result.features){
                         res.result.features.forEach(feature => {
@@ -242,7 +243,7 @@ function Map(props) {
               var newCounts = [];
               newCounts['TOTAL'] = 0;
               res.result.forEach(row=>{
-                  newCounts[row.platform] = row.count;
+                  newCounts[row.id_type] = row.count;
                   newCounts['TOTAL'] += parseInt(row.count);
               });
               setCounts(newCounts);
@@ -263,7 +264,7 @@ function Map(props) {
             ref={mapRef}
             attributionControl={false}
             maxZoom={24}
-            minZoom={12}
+            minZoom={14}
             onViewportChange={setViewport}
             interactiveLayerIds={interactiveLayerIds}
             onClick={handleClick}

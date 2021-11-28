@@ -69,11 +69,17 @@ const useStyles = makeStyles({
 
      useEffect(() => {
         var input = document.getElementById("input-address");
-        const autocomplete = new google.maps.places.Autocomplete(input);
+        const options = {
+            componentRestrictions: { country: "jp" },
+        };
+        const autocomplete = new google.maps.places.Autocomplete(input, options);
         const placeChangeHandle = google.maps.event.addListener(autocomplete, "place_changed", function () {
           var place = autocomplete.getPlace();
           if(place && place.geometry && place.formatted_address){
-            var placePhotoUrl = place.photos[0].getUrl({maxWidth:128}); 
+            var placePhotoUrl=place.url;
+            if(place.photos){
+               placePhotoUrl = place.photos[0].getUrl({maxWidth:128}); 
+            }
             setSearchPlace({
               place_id:place.place_id,
               location:[
@@ -89,8 +95,8 @@ const useStyles = makeStyles({
               name:place.name,
               address:place.formatted_address,
               type:place.types?place.types[0]:'',
-              rating:place.rating,
-              user_ratings_total:place.user_ratings_total,
+              rating:place.rating??0,
+              user_ratings_total:place.user_ratings_total??0,
               url:place.url,
               imageLink: placePhotoUrl,
               image:''

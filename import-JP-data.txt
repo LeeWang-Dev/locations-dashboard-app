@@ -1,0 +1,93 @@
+// aws rds db info
+hosting:jp-ground.ciuz5stfwmcj.us-east-1.rds.amazonaws.com
+port:5432
+db:locations_db
+user:lee
+password:Test1234
+
+CREATE EXTENSION postgis;
+
+CREATE EXTENSION aws_s3 CASCADE;
+
+// create table with a date
+
+CREATE TABLE public.locations_2021_11_24
+(
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    device_id character varying(50) COLLATE pg_catalog."default",
+    id_type character varying(10) COLLATE pg_catalog."default",
+    latitude double precision,
+    longitude double precision,
+    horizontal_accuracy double precision,
+    timestamp bigint,
+    ip_address character varying(100) COLLATE pg_catalog."default",
+    device_os character varying(10) COLLATE pg_catalog."default",
+    os_version character varying(10) COLLATE pg_catalog."default",
+    user_agent character varying(500) COLLATE pg_catalog."default",
+    country character varying(2) COLLATE pg_catalog."default",
+    source_id bigint,
+    publisher_id character varying(200) COLLATE pg_catalog."default",
+    app_id character varying(200) COLLATE pg_catalog."default",
+    location_context character varying(10) COLLATE pg_catalog."default",
+    geohash character varying(20) COLLATE pg_catalog."default",
+    geom geometry,
+    CONSTRAINT "locations_2021_11_24_pkey" PRIMARY KEY (id)
+)
+
+SELECT aws_s3.table_import_from_s3 (
+  'public.locations_2021_11_24',
+  'device_id,
+   id_type,
+   latitude,
+   longitude,
+   horizontal_accuracy,
+   timestamp,
+   ip_address,
+   device_os,
+   os_version,
+   user_agent,
+   country,
+   source_id,
+   publisher_id,
+   app_id,
+   location_context,
+   geohash',
+  '(FORMAT csv, HEADER false, DELIMITER '','', QUOTE ''"'', ESCAPE ''\'')',
+  'quadrant-csv',
+  'year=2021/month=11/day=24/part-00000-799be261-8737-4ad1-9305-08aeefee74e8-c000.csv',
+  'us-east-1',
+  'AKIATPAJQC2YHRZL7DNS',
+  'hLMS5dINTK0LEPtWi9DXcKzJ13slH8dlvwg4Hm3U'
+);
+
+// update geom field for geometry
+
+UPDATE
+ locations_2021_11_24
+SET
+ geom = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)
+
+
+// create indexes
+create index locations_2021_11_24_geom_idx on locations_2021_11_24 using gist(geom)
+create index locations_2021_11_24_device_id_idx on locations_2021_11_24 using btree(device_id)
+create index locations_2021_11_24_timestamp_idx on locations_2021_11_24 using btree(timestamp)
+create index locations_2021_11_24_id_type_idx on locations_2021_11_24 using btree(id_type)
+
+
+// create places table
+CREATE TABLE public.places
+(
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    name character varying(100) COLLATE pg_catalog."default",
+    location character varying(100) COLLATE pg_catalog."default",
+    viewport character varying(200) COLLATE pg_catalog."default",
+    place_id character varying(100) COLLATE pg_catalog."default",
+    address character varying(200) COLLATE pg_catalog."default",
+    type character varying(50) COLLATE pg_catalog."default",
+    rating double precision,
+    user_ratings_total bigint,
+    url character varying(200) COLLATE pg_catalog."default",
+    image character varying(1000) COLLATE pg_catalog."default",
+    CONSTRAINT places_pkey PRIMARY KEY (id)
+)

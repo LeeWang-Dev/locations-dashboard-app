@@ -51,7 +51,7 @@ function Counts(props){
                             </Typography>
                         </Grid>
                         <Typography variant="h5" style={{marginLeft:20}}>
-                        {counts["AAID"]?numeral(counts["AAID"]).format("0,0"):0}
+                        {counts["aaid"]?numeral(counts["aaid"]).format("0,0"):0}
                         </Typography>
                     </Paper>
                 </Grid>
@@ -64,7 +64,7 @@ function Counts(props){
                             </Typography>
                         </Grid>
                         <Typography variant="h5" style={{marginLeft:20}}>
-                        {counts["IDFA"]?numeral(counts["IDFA"]).format("0,0"):0}
+                        {counts["idfa"]?numeral(counts["idfa"]).format("0,0"):0}
                         </Typography>
                     </Paper>
                 </Grid>

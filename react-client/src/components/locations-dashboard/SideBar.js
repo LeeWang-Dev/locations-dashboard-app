@@ -31,8 +31,7 @@ import { addPlace, getPlaces, deletePlace } from '../../services/place.js';
 
 const useStyles = makeStyles({
     sideBarHeader:{
-        padding:10,
-        paddingBottom:10,
+        padding:16,
         //borderBottom:'1px solid #e3ebf1',
         backgroundColor:'#f1f6fa'
     },
@@ -145,27 +144,25 @@ function SideBar(props) {
    return (
         <>
         <div className={classes.sideBarHeader}>
-            <Grid container justifyContent="space-between" alignItems="center">
+            <Grid container justifyContent="center" alignItems="center">
                 <FavoriteIcon color="warning" style={{marginRight:10}} />
-                <Typography variant="h6" style={{flex:1}}>
+                <Typography variant="h6" style={{marginRight:10}}>
                     Favorite Places
                 </Typography>
+                {places.length>0 && (
+                    <Typography variant="caption" style={{marginRight:10}}>
+                        {`[ ${places.length} ]`}
+                    </Typography>
+                )}
                 <Button 
                     color="warning" 
                     startIcon={<AddCircleOutlineIcon />}
                     disabled={addPlaceDisabled}
                     onClick={()=>setAddPlaceDialogOpen(true)}
-                    >
+                >
                     Add Place
                 </Button>
             </Grid>  
-            {places.length>0 && (
-                <Grid container justifyContent="center">
-                    <Typography variant="caption">
-                        {`${places.length} places`}
-                    </Typography>
-                </Grid>
-            )}
         </div>
         <div className={classes.sideBarContent}>
         {

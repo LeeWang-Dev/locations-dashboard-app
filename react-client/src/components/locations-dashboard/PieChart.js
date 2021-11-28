@@ -26,8 +26,8 @@ function PieChart(props){
     useEffect(()=>{
         var newData = [
            ['Platform','Count',{ role: 'style' }],
-           ['Android',parseInt(counts["AAID"]),'#000'],
-           ['iOS',parseInt(counts["IDFA"]),'#000'],
+           ['Android',parseInt(counts["aaid"]),'#000'],
+           ['iOS',parseInt(counts["idfa"]),'#000'],
         ];
         setChartData(newData);
     },[counts]);

@@ -16,7 +16,8 @@ let theme = createTheme({
     MuiTypography:{
       styleOverrides: {
         root:{
-           lineHeight:'normal'
+           lineHeight:'normal',
+           wordBreak:'break-all'
         }
      }
     },
