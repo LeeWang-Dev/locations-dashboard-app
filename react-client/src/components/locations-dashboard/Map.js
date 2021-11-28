@@ -166,7 +166,7 @@ function Map(props) {
            let poiLocations = [];
            if(filter.category !== 'All Categories'){
                 const poiFeatures = map.queryRenderedFeatures({ layers: ['poi-label'] });
-                let categoryFeatures = poiFeatures.filter(feature=>feature.properties["category_en"]===filter.category);
+                let categoryFeatures = poiFeatures.filter(feature=>feature.properties["maki"].indexOf(filter.category.toLowerCase())>-1);
                 categoryFeatures.forEach(feature=>{
                    poiLocations.push(feature.geometry.coordinates);
                 });
@@ -180,6 +180,7 @@ function Map(props) {
                     return;
                 }
            }
+
            if(renderMode === 'cluster'){
                 let newClusterSource = {
                     type: 'FeatureCollection',
