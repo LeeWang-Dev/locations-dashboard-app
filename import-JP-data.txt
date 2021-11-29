@@ -52,7 +52,7 @@ SELECT aws_s3.table_import_from_s3 (
    app_id,
    location_context,
    geohash',
-  '(FORMAT csv, HEADER false, DELIMITER '','', QUOTE ''"'', ESCAPE ''\'')',
+  '(FORMAT csv, HEADER false, DELIMITER '','')',
   'quadrant-csv',
   'year=2021/month=11/day=24/part-00000-799be261-8737-4ad1-9305-08aeefee74e8-c000.csv',
   'us-east-1',
