@@ -214,7 +214,7 @@ function SideBar(props) {
                                                     </Typography>
                                                 </Grid>
                                             )}
-                                            <Typography variant="caption" component="div">
+                                            <Typography variant="caption" style={{display:'block'}}>
                                                 {place.type}
                                             </Typography>
                                             <Typography variant="caption">
@@ -287,7 +287,7 @@ function SideBar(props) {
                                 {(searchPlace && searchPlace.user_ratings_total>0) && (
                                     <Grid container alignItems="center">
                                         <Typography variant="caption">
-                                        {searchPlace?searchPlace.rating:''} 
+                                            {searchPlace?searchPlace.rating:''} 
                                         </Typography>
                                         <Rating 
                                             name="rating" 
@@ -299,11 +299,11 @@ function SideBar(props) {
                                             style={{marginLeft:5,marginRight:5}}
                                         />
                                         <Typography variant="caption">
-                                        {searchPlace?`(${numeral(searchPlace.user_ratings_total).format("0,0")})`:''}
+                                           {searchPlace?`(${numeral(searchPlace.user_ratings_total).format("0,0")})`:''}
                                         </Typography>
                                     </Grid>
                                 )}
-                                <Typography variant="caption" component="div">
+                                <Typography variant="caption" style={{display:'block'}}>
                                     {searchPlace?searchPlace.type:''}
                                 </Typography>
                                 <Typography variant="caption">
