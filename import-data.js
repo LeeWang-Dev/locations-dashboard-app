@@ -42,7 +42,7 @@ const tableName = `locations_${yy}_${mm}_${dd}`;
 
 // s3 bucket directory
 const bucketParams = {
-    Bucket : 'quadrant-csv',
+    Bucket : 'quadrant-csv2',
     Delimiter: '/',
     Prefix: `year=${yy}/month=${mm}/day=${dd}/`
 };

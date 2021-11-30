@@ -84,7 +84,7 @@ function Main() {
                     setRenderMode={setRenderMode}
                  />
                  <Counts counts={counts} />
-                 <PieChart counts={counts} />
+                 {counts['TOTAL'] && <PieChart counts={counts} />}
                  <TimeSlider 
                     filter={filter}
                     setFilter={setFilter}
