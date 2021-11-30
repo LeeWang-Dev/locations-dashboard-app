@@ -13,7 +13,7 @@ export const DEFAULT_VIEWPORT = {
 
 export const google = window.google;
 
-export const DEFAULT_DATE = new Date('2021-08-01');
+export const DEFAULT_DATE = new Date('2021-11-24');
 
 // mapbox gl poi-label layer maki field
 export const categories = [
