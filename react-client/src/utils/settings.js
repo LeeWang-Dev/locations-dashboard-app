@@ -1,7 +1,7 @@
 
-export const BASE_URL = 'http://localhost:8080';
+//export const BASE_URL = 'http://localhost:8080';
 
-//export const BASE_URL = 'https://jp-locations-dashboard.herokuapp.com';
+export const BASE_URL = 'https://jp-locations-dashboard.herokuapp.com';
 
 export const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoibGVld2FuZ2RldiIsImEiOiJja2tnbDU2c2gwMHNvMndsdDF1d2pxNTQ2In0.zKeo06DtCh6fLifrbCZCFA';
 
@@ -13,7 +13,7 @@ export const DEFAULT_VIEWPORT = {
 
 export const google = window.google;
 
-export const DEFAULT_DATE = new Date('2021-11-24');
+export const DEFAULT_DATE = new Date('2021-08-01');
 
 // mapbox gl poi-label layer maki field
 export const categories = [

@@ -50,7 +50,8 @@ function MarkerInfo(props){
     }
 
     return (
-        markerInfo?
+        <>
+        {markerInfo?
             <>
             <Paper className={classes.paper}>
                 <Grid container className={classes.paperHeader} alignItems="center">
@@ -70,7 +71,7 @@ function MarkerInfo(props){
                         <Typography variant="subtitle2">Country</Typography>
                     </Grid>
                     <Grid item xs={8}>
-                        <Typography variant="caption">{markerInfo.country}</Typography>
+                        <Typography variant="caption">Japan</Typography>
                     </Grid>
                     <Grid item xs={4}>
                         <Typography variant="subtitle2">Device Type</Typography>
@@ -82,19 +83,9 @@ function MarkerInfo(props){
                         <Typography variant="subtitle2">Device OS</Typography>
                     </Grid>
                     <Grid item xs={8}>
-                        <Typography variant="caption">{markerInfo.device_os}</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Typography variant="subtitle2">OS Version</Typography>
-                    </Grid>
-                    <Grid item xs={8}>
-                        <Typography variant="caption">{markerInfo.os_version}</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Typography variant="subtitle2">IP Address</Typography>
-                    </Grid>
-                    <Grid item xs={8}>
-                        <Typography variant="caption">{markerInfo.ip_address}</Typography>
+                        <Typography variant="caption">
+                            {markerInfo.id_type==='aaid'?'Android':'iOS'}
+                        </Typography>
                     </Grid>
                 </Grid>  
             </Paper>
@@ -115,11 +106,19 @@ function MarkerInfo(props){
                         </Typography>
                     </Grid>
                     <Grid item xs={4}>
-                        <Typography variant="subtitle2">Location</Typography>
+                        <Typography variant="subtitle2">Longitude</Typography>
                     </Grid>
                     <Grid item xs={8}>
                         <Typography variant="caption">
-                            {`[ ${markerInfo.longitude}, ${markerInfo.latitude} ]`}
+                            {markerInfo.longitude}
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <Typography variant="subtitle2">Latitude</Typography>
+                    </Grid>
+                    <Grid item xs={8}>
+                        <Typography variant="caption">
+                            {markerInfo.latitude}
                         </Typography>
                     </Grid>
                     <Grid item xs={4}>
@@ -137,50 +136,19 @@ function MarkerInfo(props){
                         Others
                     </Typography>
                 </Grid> 
-                <Grid container spacing={1} alignItems="center">
-                    <Grid item xs={4}>
-                        <Typography variant="subtitle2">User Agent</Typography>
-                    </Grid>
-                    <Grid item xs={8}>
-                        <Typography variant="caption">{markerInfo.user_agent}</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Typography variant="subtitle2">Source ID</Typography>
-                    </Grid>
-                    <Grid item xs={8}>
-                        <Typography variant="caption">{markerInfo.source_id}</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Typography variant="subtitle2">Publisher ID</Typography>
-                    </Grid>
-                    <Grid item xs={8}>
-                        <Typography variant="caption" component="div">{markerInfo.publisher_id}</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Typography variant="subtitle2">App ID</Typography>
-                    </Grid>
-                    <Grid item xs={8}>
-                        <Typography variant="caption">{markerInfo.app_id}</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Typography variant="subtitle2">Location Context</Typography>
-                    </Grid>
-                    <Grid item xs={8}>
-                        <Typography variant="caption">{markerInfo.location_context}</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <Typography variant="subtitle2">Geo Hash</Typography>
-                    </Grid>
-                    <Grid item xs={8}>
-                        <Typography variant="caption">{markerInfo.geohash}</Typography>
-                    </Grid>
+                <Grid container justifyContent="center">
+                    <Typography variant="caption">
+                        There is no any other information.
+                    </Typography>
                 </Grid>
-            </Paper>
+            </Paper>    
             </>
             :
-            <Grid contiainer justifyContent="center">
+            <Grid container justifyContent="center">
                 <CircularProgress />
             </Grid>
+        } 
+        </>
     );
 }
 

@@ -26,7 +26,7 @@ import { getMarkers } from "../../services/marker.js";
 import { getCounts } from "../../services/counts.js";
 
 import iconMarker from "../../assets/images/user-icon.png";
-import iconSearch from "../../assets/images/search-marker.png";
+import iconSearch from "../../assets/images/home-icon.png";
 
 import MarkerPanel from "./MarkerPanel/MarkerPanel.js";
 
@@ -427,10 +427,10 @@ function Map(props) {
             <ScaleControl style={{bottom:10,left:10}} />
             {searchPlace && (
                 <>
-                <Marker longitude={searchPlace.location[0]} latitude={searchPlace.location[1]} offsetLeft={-16} offsetTop={-32}>
+                <Marker longitude={searchPlace.location[0]} latitude={searchPlace.location[1]} offsetLeft={-16} offsetTop={-44}>
                     <img src={iconSearch} alt="marker" />
                 </Marker>
-                <Marker longitude={searchPlace.location[0]} latitude={searchPlace.location[1]} offsetLeft={16} offsetTop={-46}>
+                <Marker longitude={searchPlace.location[0]} latitude={searchPlace.location[1]} offsetLeft={20} offsetTop={-56}>
                     <div className={classes.addressLabel}>{searchPlace.address}</div>
                 </Marker>
                 </>
