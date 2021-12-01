@@ -53,8 +53,7 @@ SET
 // create indexes
 create index locations_2021_11_24_geom_idx on locations_2021_11_24 using gist(geom)
 create index locations_2021_11_24_device_id_idx on locations_2021_11_24 using btree(device_id)
-create index locations_2021_11_24_timestamp_idx on locations_2021_11_24 using btree(timestamp)
-create index locations_2021_11_24_id_type_idx on locations_2021_11_24 using btree(id_type)
+
 
 
 // create places table

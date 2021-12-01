@@ -149,24 +149,6 @@ async function build_db(){
      console.log(res.message);
    }
 
-   // Create id_type field index
-   console.log('Create id_type index...');
-   res = await createIndex('id_type','btree');
-   if(res.status === 'success'){
-     console.log(res.result);
-   }else{
-     console.log(res.message);
-   }
-   
-   // Create timestamp field index
-   console.log('Create timestamp index...');
-   res = await createIndex('timestamp','btree');
-   if(res.status === 'success'){
-     console.log(res.result);
-   }else{
-     console.log(res.message);
-   }
-   
    console.log(`${tableName} is completed.`);
 }
 

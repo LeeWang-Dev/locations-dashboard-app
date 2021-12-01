@@ -17,13 +17,11 @@ import ReactMapGL, {
 import 'mapbox-gl/dist/mapbox-gl.css';
 import mapboxgl from "mapbox-gl";
 
-import numeral from "numeral";
-
 import { MAPBOX_ACCESS_TOKEN, DEFAULT_VIEWPORT } from "../../utils/settings.js";
 import { dateFormat } from "../../utils/util.js";
-import { getClusters } from "../../services/cluster.js";
 import { getMarkers } from "../../services/marker.js";
-import { getCounts } from "../../services/counts.js";
+//import { getClusters } from "../../services/cluster.js";
+//import { getCounts } from "../../services/counts.js";
 
 import iconMarker from "../../assets/images/user-icon.png";
 import iconSearch from "../../assets/images/home-icon.png";
@@ -68,16 +66,11 @@ function Map(props) {
     const mapRef = useRef(null);
     const [viewport, setViewport] = useState(DEFAULT_VIEWPORT);
     const [interactiveLayerIds, setInteractiveLayerIds] = useState([]);
-    const [clusterSource, setClusterSource] = useState({
-        type: 'FeatureCollection',
-        features:[]
-    });
-    const [heatmapSource, setHeatmapSource] = useState({
+    const [dataSource, setDataSource] = useState({
         type: 'FeatureCollection',
         features:[]
     });
     const [showLoading, setShowLoading] = useState(true);
-    
     const [markerPanelInfo, setMarkerPanelInfo] = useState(false);
 
     const handleClick = async (e) => {
@@ -155,6 +148,19 @@ function Map(props) {
 
     }, [filter, renderMode]);
 
+    useEffect(()=>{
+        let newCounts = [];
+        newCounts['TOTAL'] = dataSource.features.length;
+        dataSource.features.forEach(feature=>{
+            if(newCounts[feature.properties.id_type]){
+                newCounts[feature.properties.id_type] += 1; 
+            }else{
+                newCounts[feature.properties.id_type] = 1;
+            }
+        });
+        setCounts(newCounts);
+    }, [dataSource]);
+
     const mapDataCallback = () => {
         const map = mapRef.current.getMap();
         setInteractiveLayerIds([]);
@@ -171,7 +177,7 @@ function Map(props) {
                    poiLocations.push(feature.geometry.coordinates);
                 });
                 if(poiLocations.length === 0){
-                    setClusterSource({
+                    setDataSource({
                         type: 'FeatureCollection',
                         features:[]
                     });
@@ -180,77 +186,34 @@ function Map(props) {
                     return;
                 }
            }
-
-           if(renderMode === 'cluster'){
-                let newClusterSource = {
-                    type: 'FeatureCollection',
-                    features:[]
-                };
-                let res = await getClusters({
-                    date: dateFormat(filter.date),
-                    timeRange: filter.timeRange,
-                    zoom: map.getZoom(),
-                    bounds: map.getBounds().toArray().flat(),
-                    poiLocations: poiLocations,
-                    poiRadius: filter.category_distance
-                });
-                
-                if(res.status === 'success'){
-                    if(res.result && res.result.features){
-                        res.result.features.forEach(feature => {
-                            var abbr = numeral(feature.properties["point_count"]).format("0.[0] a").toUpperCase();
-                            if(feature.properties["point_count"]>=1000){
-                            abbr += '+';
-                            }
-                            feature.properties["point_count_abbreviated"] = abbr;
-                        });
-                        newClusterSource = res.result;
-                    }
-                }
-                setClusterSource(newClusterSource);
-                setInteractiveLayerIds(['cluster-layer','unclustered-point-layer']);
-           }else if(renderMode === 'heatmap'){
-                let newHeatmapSource = {
-                    type: 'FeatureCollection',
-                    features:[]
-                };
-                let res = await getMarkers({
-                    date: dateFormat(filter.date),
-                    timeRange: filter.timeRange,
-                    zoom: map.getZoom(),
-                    bounds: map.getBounds().toArray().flat(),
-                    poiLocations: poiLocations,
-                    poiRadius: filter.category_distance
-                });
-                if(res.status === 'success'){
-                    if(res.result && res.result.features){
-                        newHeatmapSource = res.result;
-                    }
-                }
-                setHeatmapSource(newHeatmapSource);
-                setInteractiveLayerIds(['unclustered-point-layer']);
-           }
            
-           setShowLoading(false);
-
-           let res = await getCounts({
+           let newDataSource = {
+                type: 'FeatureCollection',
+                features:[]
+           };
+           let res = await getMarkers({
                 date: dateFormat(filter.date),
                 timeRange: filter.timeRange,
+                zoom: map.getZoom(),
                 bounds: map.getBounds().toArray().flat(),
                 poiLocations: poiLocations,
                 poiRadius: filter.category_distance
-           });
-           if(res.status === 'success'){
-              var newCounts = [];
-              newCounts['TOTAL'] = 0;
-              res.result.forEach(row=>{
-                  newCounts[row.id_type] = row.count;
-                  newCounts['TOTAL'] += parseInt(row.count);
-              });
-              setCounts(newCounts);
-           }else{
-              setCounts([]);
-           }
+            });
+
+            if(res.status === 'success'){
+                if(res.result && res.result.features){
+                    newDataSource = res.result;
+                }
+            }
+            setDataSource(newDataSource);
+            if(renderMode === 'cluster'){
+                setInteractiveLayerIds(['cluster-layer','unclustered-point-layer']);
+            }else{
+                setInteractiveLayerIds(['unclustered-point-layer']);
+            }
+
+            setShowLoading(false);
+
         }, 500);
     }
 
@@ -274,16 +237,17 @@ function Map(props) {
                 <Source
                     id="clusterSource"
                     type="geojson"
-                    data={clusterSource}
-                    //cluster={true}
-                    //clusterMaxZoom={14}
-                    //clusterRadius={50}
+                    data={dataSource}
+                    cluster={true}
+                    clusterMaxZoom={18}
+                    clusterRadius={50}
                 >
                     <Layer
                         id='cluster-layer'
                         type='circle'
                         source='clusterSource'
-                        filter={['>', 'point_count', 1]}
+                        filter={['has', 'point_count']}
+                        //filter={['>', 'point_count', 1]}
                         paint={{
                           'circle-color': ['step', ['get', 'point_count'], '#51bbd6', 100, '#f1f075', 750, '#f28cb1'],
                           'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40]
@@ -293,7 +257,8 @@ function Map(props) {
                         id='cluster-count-layer'
                         type='symbol'
                         source='clusterSource'
-                        filter={['>', 'point_count', 1]}
+                        filter={['has', 'point_count']}
+                        //filter={['>', 'point_count', 1]}
                         layout={{
                           'text-field': '{point_count_abbreviated}',
                           'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
@@ -304,7 +269,8 @@ function Map(props) {
                         id='unclustered-point-layer'
                         type='symbol'
                         source='clusterSource'
-                        filter={['==', 'point_count', 1]}
+                        filter={['!', ['has', 'point_count']]}
+                        //filter={['==', 'point_count', 1]}
                         layout={{
                            'icon-image': 'marker-icon',
                            'icon-size': 0.5,
@@ -337,7 +303,7 @@ function Map(props) {
                 <Source
                     id="heatmapSource"
                     type="geojson"
-                    data={heatmapSource}
+                    data={dataSource}
                 >
                     <Layer 
                        id='heatmap-layer'
@@ -410,7 +376,7 @@ function Map(props) {
                         <Layer
                             id='select-point-layer'
                             type='symbol'
-                            source='clusterSource'
+                            source='heatmapSource'
                             filter={['==', 'id', markerPanelInfo.id]}
                             layout={{
                                 'icon-image': 'marker-icon',

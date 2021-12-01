@@ -174,7 +174,7 @@ app.post('/api/markers', async (req,res) => {
 
   query = `
     SELECT DISTINCT ON (device_id)
-      id,geom
+      id,id_type,geom
     FROM
       ${tableName}
     WHERE
