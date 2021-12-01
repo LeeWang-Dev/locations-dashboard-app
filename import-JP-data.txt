@@ -20,16 +20,7 @@ CREATE TABLE public.locations_2021_11_24
     longitude double precision,
     horizontal_accuracy double precision,
     timestamp bigint,
-    ip_address character varying(100) COLLATE pg_catalog."default",
-    device_os character varying(10) COLLATE pg_catalog."default",
-    os_version character varying(10) COLLATE pg_catalog."default",
-    user_agent character varying(500) COLLATE pg_catalog."default",
-    country character varying(2) COLLATE pg_catalog."default",
-    source_id bigint,
-    publisher_id character varying(200) COLLATE pg_catalog."default",
-    app_id character varying(200) COLLATE pg_catalog."default",
-    location_context character varying(10) COLLATE pg_catalog."default",
-    geohash character varying(20) COLLATE pg_catalog."default",
+    dateformat character varying(20) COLLATE pg_catalog."default",
     geom geometry,
     CONSTRAINT "locations_2021_11_24_pkey" PRIMARY KEY (id)
 )
@@ -42,18 +33,9 @@ SELECT aws_s3.table_import_from_s3 (
    longitude,
    horizontal_accuracy,
    timestamp,
-   ip_address,
-   device_os,
-   os_version,
-   user_agent,
-   country,
-   source_id,
-   publisher_id,
-   app_id,
-   location_context,
-   geohash',
+   dateformat',
   '(FORMAT csv, HEADER false, DELIMITER '','', QUOTE ''"'', ESCAPE ''\'')',
-  'quadrant-csv',
+  'quadrant-csv2',
   'year=2021/month=11/day=24/part-00000-799be261-8737-4ad1-9305-08aeefee74e8-c000.csv',
   'us-east-1',
   'AKIATPAJQC2YHRZL7DNS',
@@ -92,20 +74,4 @@ CREATE TABLE public.places
     CONSTRAINT places_pkey PRIMARY KEY (id)
 )
 
-// unoin tables
-CREATE new_table
-AS
- (SELECT * FROM table_1 WHERE timestamp>= AND timestamp< )
-   AND
- (SELECT * FROM table_1 WHERE timestamp>= AND timestamp< )
 
-// insert rows from another tables
-INSERT INTO TABLE1 (id, col_1, col_2, col_3)
-(
-  SELECT 
-    id, 'data1', 'data2', 'data3'
-  FROM 
-    TABLE2
-  WHERE 
-    timestamp = 'something'
-)

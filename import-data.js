@@ -35,7 +35,7 @@ AWS.config.update({
 const s3 = new AWS.S3();
 
 // date config
-const yy = '2021', mm = '11', dd = '22';
+const yy = '2021', mm = '09', dd = '01';
 
 // table name for creating
 const tableName = `locations_${yy}_${mm}_${dd}`;
@@ -58,26 +58,16 @@ app.listen(PORT, () => {
 build_db();
 
 async function build_db(){
-
-   var res; 
-
+   
+  let res;
    // Check table
-   res  = await checkExistTable();
+   
+   res = await checkExistTable();
    if(res.status === 'success'){
      if(res.result.exists){
         console.log(`${tableName} already exsist.`);
         return;
      }
-   }else{
-     console.log(res.message);
-     return;
-   }
-
-   // Create new table
-   console.log(`Creating new table ${tableName}`);
-   res = await createTable();
-   if(res.status === 'success'){
-     console.log(res.result);
    }else{
      console.log(res.message);
      return;
@@ -88,6 +78,17 @@ async function build_db(){
    res = await getKeysFromAWSBucket();
    if(res.status === 'success'){
      if(res.result.length>0){
+       // Create new table
+       
+       console.log(`Creating new table ${tableName}`);
+       var createTableResponse = await createTable();
+       if(createTableResponse.status === 'success'){
+         console.log(createTableResponse.result);
+       }else{
+         console.log(createTableResponse.message);
+         return;
+       }
+       
        const fileKeys = res.result;
        // import csv data to database
        console.log('Start import csv...');
@@ -109,6 +110,15 @@ async function build_db(){
    }else{
      console.log(res.message);
      return;
+   }
+   
+   // Delete dateformat column
+   console.log('Delete dateformat column...');
+   res = await deleteColumn('dateformat');
+   if(res.status === 'success'){
+      console.log(res.result);
+   }else{
+      console.log(res.message);
    }
 
    // Update geom field for point geometry
@@ -147,8 +157,8 @@ async function build_db(){
    }else{
      console.log(res.message);
    }
-
-   // Create id_type field index
+   
+   // Create timestamp field index
    console.log('Create timestamp index...');
    res = await createIndex('timestamp','btree');
    if(res.status === 'success'){
@@ -198,20 +208,11 @@ function createTable(){
           id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
           device_id character varying(50) COLLATE pg_catalog."default",
           id_type character varying(10) COLLATE pg_catalog."default",
-          latitude double precision,
           longitude double precision,
+          latitude double precision,
           horizontal_accuracy double precision,
           timestamp bigint,
-          ip_address character varying(100) COLLATE pg_catalog."default",
-          device_os character varying(10) COLLATE pg_catalog."default",
-          os_version character varying(10) COLLATE pg_catalog."default",
-          user_agent character varying(500) COLLATE pg_catalog."default",
-          country character varying(2) COLLATE pg_catalog."default",
-          source_id bigint,
-          publisher_id character varying(200) COLLATE pg_catalog."default",
-          app_id character varying(200) COLLATE pg_catalog."default",
-          location_context character varying(10) COLLATE pg_catalog."default",
-          geohash character varying(20) COLLATE pg_catalog."default",
+          dateformat character varying(20) COLLATE pg_catalog."default",
           geom geometry,
           CONSTRAINT "${tableName}_pkey" PRIMARY KEY (id)
       )
@@ -264,20 +265,11 @@ function importCSV(fileKey){
           'public.${tableName}',
           'device_id,
            id_type,
-           latitude,
            longitude,
+           latitude,
            horizontal_accuracy,
            timestamp,
-           ip_address,
-           device_os,
-           os_version,
-           user_agent,
-           country,
-           source_id,
-           publisher_id,
-           app_id,
-           location_context,
-           geohash',
+           dateformat',
           '(FORMAT csv, HEADER false, DELIMITER '','')',
           '${bucketParams.Bucket}',
           '${fileKey}',
@@ -300,6 +292,27 @@ function importCSV(fileKey){
           });
       }
    });
+}
+
+function deleteColumn(column_name){
+  return new Promise(async (resolve) => {
+    const query = `
+      ALTER TABLE ${tableName}
+      DROP COLUMN IF EXISTS ${column_name}
+    `;
+    try {
+        await dbClient.query(query);
+        resolve({
+          'status': 'success',
+          'result': `Deleted ${column_name} column successfully.`
+        });
+    } catch (err) {
+        resolve({
+          'status': 'failed',
+          'message': err
+        });
+    }
+  });
 }
 
 function updateGeometry(){
