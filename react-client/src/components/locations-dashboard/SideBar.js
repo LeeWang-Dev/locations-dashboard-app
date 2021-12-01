@@ -196,7 +196,10 @@ function SideBar(props) {
                                         secondary={
                                             <>
                                             {place.user_ratings_total>0 && (
-                                                <Grid container alignItems="center">
+                                                <span style={{
+                                                    display:'flex',
+                                                    alignItems:'center'
+                                                }}>
                                                     <Typography variant="caption">
                                                        {place.rating} 
                                                     </Typography>
@@ -212,7 +215,7 @@ function SideBar(props) {
                                                     <Typography variant="caption">
                                                        {`(${numeral(place.user_ratings_total).format("0,0")})`}
                                                     </Typography>
-                                                </Grid>
+                                                </span>
                                             )}
                                             <Typography variant="caption" style={{display:'block'}}>
                                                 {place.type}
@@ -285,7 +288,10 @@ function SideBar(props) {
                             secondary={
                                 <>
                                 {(searchPlace && searchPlace.user_ratings_total>0) && (
-                                    <Grid container alignItems="center">
+                                    <span style={{
+                                        display:'flex',
+                                        alignItems:'center'
+                                    }}>
                                         <Typography variant="caption">
                                             {searchPlace?searchPlace.rating:''} 
                                         </Typography>
@@ -301,7 +307,7 @@ function SideBar(props) {
                                         <Typography variant="caption">
                                            {searchPlace?`(${numeral(searchPlace.user_ratings_total).format("0,0")})`:''}
                                         </Typography>
-                                    </Grid>
+                                    </span>
                                 )}
                                 <Typography variant="caption" style={{display:'block'}}>
                                     {searchPlace?searchPlace.type:''}

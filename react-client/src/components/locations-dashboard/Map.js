@@ -146,9 +146,10 @@ function Map(props) {
 
        return () => map.off('moveend', mapDataCallback);
 
-    }, [filter, renderMode]);
+    }, [filter]);
 
     useEffect(()=>{
+
         let newCounts = [];
         newCounts['TOTAL'] = dataSource.features.length;
         dataSource.features.forEach(feature=>{
@@ -161,9 +162,18 @@ function Map(props) {
         setCounts(newCounts);
     }, [dataSource]);
 
+    useEffect(()=>{
+        if(dataSource.features.length>0){
+            if(renderMode === 'cluster'){
+                setInteractiveLayerIds(['cluster-layer','unclustered-point-layer']);
+            }else{
+                setInteractiveLayerIds(['unclustered-point-layer']);
+            }
+        }
+    }, [renderMode, dataSource]);
+
     const mapDataCallback = () => {
         const map = mapRef.current.getMap();
-        setInteractiveLayerIds([]);
         if(timeout){
             clearTimeout(timeout);
         }
@@ -206,12 +216,7 @@ function Map(props) {
                 }
             }
             setDataSource(newDataSource);
-            if(renderMode === 'cluster'){
-                setInteractiveLayerIds(['cluster-layer','unclustered-point-layer']);
-            }else{
-                setInteractiveLayerIds(['unclustered-point-layer']);
-            }
-
+           
             setShowLoading(false);
 
         }, 500);

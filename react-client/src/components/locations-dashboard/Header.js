@@ -123,7 +123,7 @@ const useStyles = makeStyles({
      return (
         <Grid container className={classes.header} spacing={1} alignItems="center">
             <Grid container item lg={3} md={12} justifyContent="center">
-                <img src={imgLogo} className={classes.logo} />
+                <img src={imgLogo} className={classes.logo} alt="logo" />
             </Grid>
             <Grid container item spacing={2} lg={9} md={12}>
                 <Grid item md={4}>

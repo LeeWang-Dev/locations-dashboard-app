@@ -194,7 +194,7 @@ function TrackingMap(props){
             // current track point
             let t = 0;
             features.forEach(feature=>{
-                if(feature.properties.id == params.id){
+                if(feature.properties.id === params.id){
                     setTrackPoint({
                         type:'FeatureCollection',
                         features:[feature]
