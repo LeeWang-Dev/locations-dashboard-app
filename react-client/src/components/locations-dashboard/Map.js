@@ -265,7 +265,7 @@ function Map(props) {
             ref={mapRef}
             attributionControl={false}
             maxZoom={24}
-            minZoom={15}
+            minZoom={16}
             onViewportChange={setViewport}
             interactiveLayerIds={interactiveLayerIds}
             onClick={handleClick}
