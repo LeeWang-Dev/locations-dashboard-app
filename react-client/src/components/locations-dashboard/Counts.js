@@ -60,7 +60,7 @@ function Counts(props){
                         <Grid container alignItems="center">
                             <PhoneIphoneIcon color="secondary" />
                             <Typography variant="caption">
-                                iPhone
+                                iOS
                             </Typography>
                         </Grid>
                         <Typography variant="h5" style={{marginLeft:20}}>

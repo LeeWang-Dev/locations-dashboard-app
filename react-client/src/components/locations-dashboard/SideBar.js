@@ -4,6 +4,7 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -68,11 +69,12 @@ function SideBar(props) {
       searchPlace,
       setSearchPlace
    } = props;
+   const [isPlacesLoading, setIsPlacesLoading] = useState(false);
    const [places, setPlaces] = useState([]);
    const [addPlaceDialogOpen, setAddPlaceDialogOpen] = useState(false);
    const [deletePlaceDialogOpen, setDeletePlaceDialogOpen] = useState(false);
    const [addPlaceDisabled, setAddPlaceDisabled] = useState(true);
-
+   
    const handleURLChange = (e) => {
       setSearchPlace({
           ...searchPlace,
@@ -134,6 +136,7 @@ function SideBar(props) {
 
    const fetchPlaces = async () => {
       let res = await getPlaces();
+      setIsPlacesLoading(true);
       if(res.status === 'success'){
           setPlaces(res.result);
       }else{
@@ -166,78 +169,79 @@ function SideBar(props) {
         </div>
         <div className={classes.sideBarContent}>
         {
-            places.length>0?
-                <List dense={true} >
-                    {
-                        places.map((place,index)=>(
-                            <ListItem 
-                                key={place.place_id} 
-                                className={classes.listItem}
-                                disablePadding={true}
-                                secondaryAction={
-                                    <IconButton 
-                                        edge="end" aria-label="delete"
-                                        onClick={handleDeletePlace(place)}
-                                    >
-                                        <DeleteOutlineIcon />
-                                    </IconButton>
-                                }
-                            >
-                                <ListItemButton 
-                                  selected={searchPlace?searchPlace.place_id===place.place_id:false}
-                                  onClick={()=>setSearchPlace(place)}
+            isPlacesLoading?
+                places.length>0?
+                    <List dense={true} >
+                        {
+                            places.map((place,index)=>(
+                                <ListItem 
+                                    key={place.place_id} 
+                                    className={classes.listItem}
+                                    disablePadding={true}
+                                    secondaryAction={
+                                        <IconButton 
+                                            edge="end" aria-label="delete"
+                                            onClick={handleDeletePlace(place)}
+                                        >
+                                            <DeleteOutlineIcon />
+                                        </IconButton>
+                                    }
                                 >
-                                    <ListItemText 
-                                        primary={
-                                            <Typography variant="subtitle2" style={{marginBottom:4}}>
-                                                {place.name}
-                                            </Typography>
-                                        }
-                                        secondary={
-                                            <>
-                                            {place.user_ratings_total>0 && (
-                                                <span style={{
-                                                    display:'flex',
-                                                    alignItems:'center'
-                                                }}>
-                                                    <Typography variant="caption">
-                                                       {place.rating} 
-                                                    </Typography>
-                                                    <Rating 
-                                                        name="rating" 
-                                                        size="small"
-                                                        defaultValue={0} 
-                                                        precision={0.1} 
-                                                        readOnly
-                                                        value={place.rating} 
-                                                        style={{marginLeft:5,marginRight:5}}
-                                                    />
-                                                    <Typography variant="caption">
-                                                       {`(${numeral(place.user_ratings_total).format("0,0")})`}
-                                                    </Typography>
-                                                </span>
-                                            )}
-                                            <Typography variant="caption" style={{display:'block'}}>
-                                                {place.type}
-                                            </Typography>
-                                            <Typography variant="caption">
-                                                {place.address}
-                                            </Typography>
-                                            </>
-                                        }
-                                    />
-                                    <ListItemAvatar>
-                                        <Avatar
-                                            alt="image"
-                                            src={place.image}
+                                    <ListItemButton 
+                                    selected={searchPlace?searchPlace.place_id===place.place_id:false}
+                                    onClick={()=>setSearchPlace(place)}
+                                    >
+                                        <ListItemText 
+                                            primary={
+                                                <Typography variant="subtitle2" style={{marginBottom:4}}>
+                                                    {place.name}
+                                                </Typography>
+                                            }
+                                            secondary={
+                                                <>
+                                                {place.user_ratings_total>0 && (
+                                                    <span style={{
+                                                        display:'flex',
+                                                        alignItems:'center'
+                                                    }}>
+                                                        <Typography variant="caption">
+                                                        {place.rating} 
+                                                        </Typography>
+                                                        <Rating 
+                                                            name="rating" 
+                                                            size="small"
+                                                            defaultValue={0} 
+                                                            precision={0.1} 
+                                                            readOnly
+                                                            value={place.rating} 
+                                                            style={{marginLeft:5,marginRight:5}}
+                                                        />
+                                                        <Typography variant="caption">
+                                                        {`(${numeral(place.user_ratings_total).format("0,0")})`}
+                                                        </Typography>
+                                                    </span>
+                                                )}
+                                                <Typography variant="caption" style={{display:'block'}}>
+                                                    {place.type}
+                                                </Typography>
+                                                <Typography variant="caption">
+                                                    {place.address}
+                                                </Typography>
+                                                </>
+                                            }
                                         />
-                                    </ListItemAvatar>
-                                </ListItemButton>
-                            </ListItem>
-                        ))
-                    }
-                </List>
-            :
+                                        <ListItemAvatar>
+                                            <Avatar
+                                                alt="image"
+                                                src={place.image}
+                                            />
+                                        </ListItemAvatar>
+                                    </ListItemButton>
+                                </ListItem>
+                            ))
+                        }
+                    </List>
+                :
                 <>
                 <Typography variant="body1" component="div" align="center" style={{marginTop:30,padding:10}}>
                     Places is empty.
@@ -246,6 +250,10 @@ function SideBar(props) {
                     Please add your favorite places.
                 </Typography>     
                 </>
+            :
+            <Grid container justifyContent="center" style={{marginTop:20}}>
+                <CircularProgress />
+            </Grid>
         }
         </div>
         <Dialog
