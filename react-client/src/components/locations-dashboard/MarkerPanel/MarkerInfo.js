@@ -77,7 +77,9 @@ function MarkerInfo(props){
                         <Typography variant="subtitle2">Device Type</Typography>
                     </Grid>
                     <Grid item xs={8}>
-                        <Typography variant="caption">{markerInfo.id_type}</Typography>
+                        <Typography variant="caption">
+                            {markerInfo.id_type.toUpperCase()}
+                        </Typography>
                     </Grid>
                     <Grid item xs={4}>
                         <Typography variant="subtitle2">Device OS</Typography>

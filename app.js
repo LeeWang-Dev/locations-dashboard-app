@@ -272,7 +272,17 @@ app.post('/api/marker/info', async (req, res) => {
   const { date, id } = req.body;
   const tableName = getTableName(date);
   var query = `
-     SELECT * FROM ${tableName} WHERE id=${id}
+     SELECT 
+       id,
+       device_id,
+       id_type,
+       ST_X(geom) AS longitude,
+       ST_Y(geom) AS latitude,
+       horizontal_accuracy,
+       timestamp
+     FROM 
+       ${tableName} 
+     WHERE id=${id}
   `;
   try {
       const result = await dbClient.query(query);
@@ -294,8 +304,6 @@ app.post('/api/marker/tracking', async (req, res) => {
   var query = `
      SELECT 
       id,
-      latitude,
-      longitude,
       horizontal_accuracy,
       timestamp,
       geom
