@@ -1,9 +1,9 @@
 // aws rds db info
-hosting:jp-ground.ciuz5stfwmcj.us-east-1.rds.amazonaws.com
+hosting:***
 port:5432
 db:locations_db
-user:lee
-password:Test1234
+user:***
+password:***
 
 CREATE EXTENSION postgis;
 
@@ -35,11 +35,11 @@ SELECT aws_s3.table_import_from_s3 (
    timestamp,
    dateformat',
   '(FORMAT csv, HEADER false, DELIMITER '','', QUOTE ''"'', ESCAPE ''\'')',
-  'quadrant-csv2',
-  'year=2021/month=11/day=24/part-00000-799be261-8737-4ad1-9305-08aeefee74e8-c000.csv',
-  'us-east-1',
-  'AKIATPAJQC2YHRZL7DNS',
-  'hLMS5dINTK0LEPtWi9DXcKzJ13slH8dlvwg4Hm3U'
+  'bucket name',
+  'file path',
+  'region',
+  'AWS Access key',
+  'AWS Secret access key'
 );
 
 // update geom field for geometry

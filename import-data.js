@@ -11,9 +11,9 @@ const app = express();
 // postgresql db config
 const dbClient = new Client({
   user: 'lee',
-  host: 'jp-ground.ciuz5stfwmcj.us-east-1.rds.amazonaws.com',
+  host: '***',  // db hosting
   database: 'locations_db',
-  password: 'Test1234',
+  password: '***',  
   port: 5432,
   ssl: {
     rejectUnauthorized: false,
@@ -24,8 +24,8 @@ dbClient.connect();
 
 // AWS config
 const AWS = require('aws-sdk');
-const accessKeyId = 'AKIATPAJQC2YHRZL7DNS';
-const secretAccessKey = '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';
+const accessKeyId = '***'; // aws accesskey
+const secretAccessKey = '***'; // aws secret access key
 const region = 'us-east-1';
 AWS.config.update({
     accessKeyId: accessKeyId, 
@@ -42,7 +42,7 @@ const tableName = `locations_${yy}_${mm}_${dd}`;
 
 // s3 bucket directory
 const bucketParams = {
-    Bucket : 'quadrant-csv2',
+    Bucket : '***',  // bucket name
     Delimiter: '/',
     Prefix: `year=${yy}/month=${mm}/day=${dd}/`
 };
